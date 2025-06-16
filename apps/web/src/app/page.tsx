@@ -1,9 +1,12 @@
+import { Button } from '@heroui/button';
+
 import styles from './page.module.css';
 
 export default function Home() {
   return (
     <div className={styles.page}>
       <main className={styles.main}>Ecommerce app web</main>
+      <Button>Click me</Button>
     </div>
   );
 }
