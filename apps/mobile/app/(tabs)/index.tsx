@@ -5,6 +5,7 @@ import { ThemedText } from '@/components/ThemedText';
 import { ThemedView } from '@/components/ThemedView';
 import { Paragraph } from '@/components/ui/Paragraph';
 import { Strong } from '@/components/ui/Strong';
+import { Button } from 'react-native-paper';
 
 export default function HomeScreen() {
   return (
@@ -46,6 +47,9 @@ export default function HomeScreen() {
           Tap the Explore tab to learn more about what's included in this starter app.
         </ThemedText>
       </ThemedView>
+      <Button icon="paw" mode="contained-tonal" onPress={() => console.log('Pressed')}>
+        Press me
+      </Button>
     </ParallaxScrollView>
   );
 }
