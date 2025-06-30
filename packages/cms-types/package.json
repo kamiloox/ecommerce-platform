@@ -1,0 +1,12 @@
+{
+  "name": "@repo/cms-types",
+  "private": true,
+  "license": "MIT",
+  "main": "index.ts",
+  "publishConfig": {
+    "access": "public"
+  },
+  "devDependencies": {
+    "typescript": "5.8.3"
+  }
+}

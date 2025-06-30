@@ -51,6 +51,9 @@ importers:
         specifier: 0.34.2
         version: 0.34.2
     devDependencies:
+      '@repo/cms-types':
+        specifier: workspace:*
+        version: link:../../packages/cms-types
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -200,6 +203,9 @@ importers:
         specifier: 2.11.0
         version: 2.11.0
     devDependencies:
+      '@repo/cms-types':
+        specifier: workspace:*
+        version: link:../../packages/cms-types
       '@repo/eslint-config':
         specifier: workspace:*
         version: link:../../packages/eslint-config
@@ -227,6 +233,12 @@ importers:
       typescript:
         specifier: 5.7.3
         version: 5.7.3
+
+  packages/cms-types:
+    devDependencies:
+      typescript:
+        specifier: 5.8.3
+        version: 5.8.3
 
   packages/eslint-config:
     dependencies:

@@ -2,6 +2,7 @@
 import { postgresAdapter } from '@payloadcms/db-postgres';
 import { payloadCloudPlugin } from '@payloadcms/payload-cloud';
 import { lexicalEditor } from '@payloadcms/richtext-lexical';
+import { Config } from '@repo/cms-types';
 import path from 'path';
 import { buildConfig } from 'payload';
 import { fileURLToPath } from 'url';
@@ -25,7 +26,8 @@ export default buildConfig({
   editor: lexicalEditor(),
   secret: process.env.PAYLOAD_SECRET || '',
   typescript: {
-    outputFile: path.resolve(dirname, 'payload-types.ts'),
+    outputFile: path.resolve(dirname, '../../../packages/cms-types/types.ts'),
+    declare: false,
   },
   db: postgresAdapter({
     pool: {
@@ -38,3 +40,8 @@ export default buildConfig({
     // storage-adapter-placeholder
   ],
 });
+
+declare module 'payload' {
+  // eslint-disable-next-line @typescript-eslint/no-empty-object-type
+  export interface GeneratedTypes extends Config {}
+}

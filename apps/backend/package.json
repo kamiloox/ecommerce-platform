@@ -28,6 +28,7 @@
     "@payloadcms/db-postgres": "3.33.0"
   },
   "devDependencies": {
+    "@repo/cms-types": "workspace:*",
     "@repo/eslint-config": "workspace:*",
     "@types/node": "^22.5.4",
     "@types/react": "19.1.0",
