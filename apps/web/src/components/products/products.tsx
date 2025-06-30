@@ -1,0 +1,54 @@
+'use client';
+import { fetchProducts } from '@/app/page';
+import { Card, CardBody, CardFooter, Image, Button } from '@heroui/react';
+import { useSuspenseQuery } from '@tanstack/react-query';
+import { ShoppingCartIcon } from 'lucide-react';
+
+interface ProductsProps {
+  page: number;
+}
+
+export const Products = ({ page }: ProductsProps) => {
+  const { data } = useSuspenseQuery({
+    queryKey: ['products', page],
+    queryFn: () => fetchProducts({ page }),
+  });
+
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+      {data?.docs.map((product) => {
+        const image = product.images?.[0]?.image;
+        const imageUrl = typeof image === 'object' && image?.url ? image.url : '';
+
+        return (
+          <Card key={product.id} className="w-full">
+            <CardBody className="p-0">
+              <Image
+                alt={product.name}
+                className="w-full h-[300px] object-cover"
+                src={imageUrl}
+                removeWrapper
+              />
+            </CardBody>
+            <CardFooter className="flex flex-col items-start">
+              <div className="flex justify-between items-center w-full mb-2">
+                <h3 className="text-lg font-semibold">{product.name}</h3>
+                <p className="text-default-500 font-medium">${product.price.toFixed(2)}</p>
+              </div>
+              <Button
+                color="primary"
+                variant="solid"
+                radius="full"
+                size="md"
+                startContent={<ShoppingCartIcon size={16} />}
+                className="w-full"
+              >
+                Add to Cart
+              </Button>
+            </CardFooter>
+          </Card>
+        );
+      })}
+    </div>
+  );
+};
