@@ -4,7 +4,7 @@ import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@h
 import { ShoppingBagIcon, ShoppingCartIcon, LockIcon } from 'lucide-react';
 import { usePathname } from 'next/navigation';
 
-export const Header: React.FC = () => {
+export const Header = () => {
   const pathname = usePathname();
 
   return (

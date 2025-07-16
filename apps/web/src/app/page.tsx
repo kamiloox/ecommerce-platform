@@ -1,15 +1,8 @@
 import React from 'react';
-import wretch from 'wretch';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 import { Pagination } from '@heroui/react';
 import { Products } from '@/components/products/products';
-import { ProductsResult } from '@repo/cms-types'; // Import types as needed
-import { getBaseUrl } from '@/utils/url';
-
-export const fetchProducts = async ({ page = 1 }: { page?: number }) => {
-  const baseUrl = getBaseUrl();
-  return wretch(`${baseUrl}/cms/products?page=${page}`).get().json<ProductsResult>();
-};
+import { getManyProducts } from '@/api/products';
 
 const Home = async ({ searchParams }: { searchParams: { page: string } }) => {
   const queryClient = new QueryClient();
@@ -20,7 +13,7 @@ const Home = async ({ searchParams }: { searchParams: { page: string } }) => {
 
   await queryClient.prefetchQuery({
     queryKey: ['products', pageNumber],
-    queryFn: () => fetchProducts({ page: pageNumber }),
+    queryFn: () => getManyProducts({ page: pageNumber }),
   });
 
   return (

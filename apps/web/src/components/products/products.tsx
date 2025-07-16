@@ -1,5 +1,6 @@
 'use client';
-import { fetchProducts } from '@/app/page';
+import { getManyProducts } from '@/api/products';
+import { getImageUrl } from '@/utils/image';
 import { Card, CardBody, CardFooter, Image, Button } from '@heroui/react';
 import { useSuspenseQuery } from '@tanstack/react-query';
 import { ShoppingCartIcon } from 'lucide-react';
@@ -11,14 +12,13 @@ interface ProductsProps {
 export const Products = ({ page }: ProductsProps) => {
   const { data } = useSuspenseQuery({
     queryKey: ['products', page],
-    queryFn: () => fetchProducts({ page }),
+    queryFn: () => getManyProducts({ page }),
   });
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {data?.docs.map((product) => {
-        const image = product.images?.[0]?.image;
-        const imageUrl = typeof image === 'object' && image?.url ? image.url : '';
+        const image = product.images?.[0];
 
         return (
           <Card key={product.id} className="w-full">
@@ -26,7 +26,7 @@ export const Products = ({ page }: ProductsProps) => {
               <Image
                 alt={product.name}
                 className="w-full h-[300px] object-cover"
-                src={imageUrl}
+                src={image ? getImageUrl(image) : ''}
                 removeWrapper
               />
             </CardBody>
