@@ -70,6 +70,7 @@ export interface Config {
     users: User;
     media: Media;
     products: Product;
+    orders: Order;
     cart: Cart;
     'payload-locked-documents': PayloadLockedDocument;
     'payload-preferences': PayloadPreference;
@@ -80,6 +81,7 @@ export interface Config {
     users: UsersSelect<false> | UsersSelect<true>;
     media: MediaSelect<false> | MediaSelect<true>;
     products: ProductsSelect<false> | ProductsSelect<true>;
+    orders: OrdersSelect<false> | OrdersSelect<true>;
     cart: CartSelect<false> | CartSelect<true>;
     'payload-locked-documents': PayloadLockedDocumentsSelect<false> | PayloadLockedDocumentsSelect<true>;
     'payload-preferences': PayloadPreferencesSelect<false> | PayloadPreferencesSelect<true>;
@@ -244,6 +246,32 @@ export interface Product {
 }
 /**
  * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders".
+ */
+export interface Order {
+  id: number;
+  orderNumber: string;
+  customer: number | User;
+  status: 'pending' | 'processing' | 'shipped' | 'delivered' | 'cancelled';
+  items: {
+    product: number | Product;
+    quantity: number;
+    unitPrice: number;
+    id?: string | null;
+  }[];
+  totalAmount: number;
+  shippingAddress: {
+    firstName: string;
+    lastName: string;
+    address: string;
+    city: string;
+    zipCode: string;
+  };
+  updatedAt: string;
+  createdAt: string;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
  * via the `definition` "cart".
  */
 export interface Cart {
@@ -280,6 +308,10 @@ export interface PayloadLockedDocument {
     | ({
         relationTo: 'products';
         value: number | Product;
+      } | null)
+    | ({
+        relationTo: 'orders';
+        value: number | Order;
       } | null)
     | ({
         relationTo: 'cart';
@@ -394,6 +426,35 @@ export interface ProductsSelect<T extends boolean = true> {
       };
   status?: T;
   featured?: T;
+  updatedAt?: T;
+  createdAt?: T;
+}
+/**
+ * This interface was referenced by `Config`'s JSON-Schema
+ * via the `definition` "orders_select".
+ */
+export interface OrdersSelect<T extends boolean = true> {
+  orderNumber?: T;
+  customer?: T;
+  status?: T;
+  items?:
+    | T
+    | {
+        product?: T;
+        quantity?: T;
+        unitPrice?: T;
+        id?: T;
+      };
+  totalAmount?: T;
+  shippingAddress?:
+    | T
+    | {
+        firstName?: T;
+        lastName?: T;
+        address?: T;
+        city?: T;
+        zipCode?: T;
+      };
   updatedAt?: T;
   createdAt?: T;
 }
