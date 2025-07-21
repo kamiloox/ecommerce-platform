@@ -1,4 +1,4 @@
-import { Product } from './types';
+import { Product, User } from './types';
 export * from './types';
 
 export interface Pagination<T> {
@@ -15,3 +15,9 @@ export interface Pagination<T> {
 }
 
 export type ProductsResult = Pagination<Product>;
+
+export type CurrentUser = {
+  user: Pick<User, 'id' | 'email' | 'loginAttempts' | 'createdAt'>;
+  token: string;
+  exp: number;
+};

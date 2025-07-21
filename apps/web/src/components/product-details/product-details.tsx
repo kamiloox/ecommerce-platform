@@ -1,21 +1,26 @@
-'use client';
-
 import React from 'react';
-import { Button, Input, Image, Chip } from '@heroui/react';
+import { Button, Input, Image, Chip, addToast } from '@heroui/react';
 import { TruckIcon, RepeatIcon, ShieldCheckIcon, ShoppingCartIcon } from 'lucide-react';
 import { RichText, defaultJSXConverters } from '@payloadcms/richtext-lexical/react';
 import { getImageUrl } from '@/utils/image';
-import { useSuspenseQuery } from '@tanstack/react-query';
+import { useMutation, useQuery } from '@tanstack/react-query';
 import { getProduct } from '@/api/products';
+import { addToCart } from '@/api/cart';
+import { getCurrentUser } from '@/api/users';
 
 interface ProductDetailsProps {
   slug: string;
 }
 
 export const ProductDetails = ({ slug }: ProductDetailsProps) => {
-  const { data } = useSuspenseQuery({
+  const { data } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => getProduct({ slug }),
+  });
+
+  const { data: currentUser } = useQuery({
+    queryKey: ['currentUser'],
+    queryFn: getCurrentUser,
   });
 
   const [quantity, setQuantity] = React.useState(1);
@@ -26,6 +31,31 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
       setQuantity(newQuantity);
     }
   };
+
+  const { mutate } = useMutation({
+    mutationFn: ({
+      userId,
+      productId,
+      quantity,
+    }: {
+      userId: number;
+      productId: number;
+      quantity: number;
+    }) => addToCart(userId, productId, quantity),
+    onSuccess: () => {
+      addToast({
+        title: 'Product added to cart successfully',
+        color: 'success',
+      });
+      setQuantity(1);
+    },
+    onError: () => {
+      addToast({
+        title: 'Failed to add product to cart',
+        color: 'danger',
+      });
+    },
+  });
 
   if (!data) {
     return <div>Product not found</div>;
@@ -103,7 +133,13 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
                 min={1}
                 className="w-24"
               />
-              <Button color="primary" className="flex-grow">
+              <Button
+                color="primary"
+                className="flex-grow"
+                onClick={() =>
+                  mutate({ userId: currentUser?.user.id || NaN, productId: data.id, quantity })
+                }
+              >
                 <ShoppingCartIcon className="mr-2" />
                 Add to Cart
               </Button>

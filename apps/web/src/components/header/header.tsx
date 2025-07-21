@@ -2,24 +2,27 @@
 import React from 'react';
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@heroui/react';
 import { ShoppingBagIcon, ShoppingCartIcon, LockIcon } from 'lucide-react';
-import { usePathname } from 'next/navigation';
 
-export const Header = () => {
-  const pathname = usePathname();
+interface HeaderProps {
+  currentPath?: string;
+}
 
+export const Header = ({ currentPath }: HeaderProps) => {
   return (
     <Navbar isBordered>
       <NavbarBrand>
-        <ShoppingBagIcon className="text-primary text-2xl mr-2" />
-        <p className="font-bold text-inherit">AJP Shop</p>
+        <Link color="foreground" href="/">
+          <ShoppingBagIcon className="text-primary text-2xl mr-2" />
+          <p className="font-bold text-inherit">AJP Shop</p>
+        </Link>
       </NavbarBrand>
       <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <NavbarItem isActive={pathname === '/'}>
+        <NavbarItem isActive={currentPath === '/'}>
           <Link color="foreground" href="/">
             Home
           </Link>
         </NavbarItem>
-        <NavbarItem isActive={pathname === '/products'}>
+        <NavbarItem isActive={currentPath === '/products'}>
           <Link color="foreground" href="/products">
             Products
           </Link>
