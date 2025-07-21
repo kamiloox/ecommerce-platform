@@ -33,7 +33,7 @@ export const Header = ({ currentPath }: HeaderProps) => {
           <Button
             as={Link}
             color="primary"
-            href="/cart"
+            href="/checkout"
             variant="flat"
             startContent={<ShoppingCartIcon />}
           >

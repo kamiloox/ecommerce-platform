@@ -1,3 +1,5 @@
+'use client';
+
 import React from 'react';
 import { Button, Input, Image, Chip, addToast } from '@heroui/react';
 import { TruckIcon, RepeatIcon, ShieldCheckIcon, ShoppingCartIcon } from 'lucide-react';
@@ -44,14 +46,14 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
     }) => addToCart(userId, productId, quantity),
     onSuccess: () => {
       addToast({
-        title: 'Product added to cart successfully',
+        title: '🛒 Product added to cart successfully!',
         color: 'success',
       });
       setQuantity(1);
     },
     onError: () => {
       addToast({
-        title: 'Failed to add product to cart',
+        title: '❌ Failed to add product to cart. Please try again.',
         color: 'danger',
       });
     },
