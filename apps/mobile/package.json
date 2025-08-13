@@ -5,7 +5,7 @@
   "main": "expo-router/entry",
   "scripts": {
     "dev": "expo start",
-    "lint": "eslint --ext js,ts,tsx .",
+    "lint": "eslint --ext js,ts,tsx --fix .",
     "test": "jest",
     "build": "expo export --output-dir ./build --platform all",
     "start": "expo start",
@@ -16,8 +16,10 @@
   },
   "dependencies": {
     "@expo/vector-icons": "^14.1.0",
+    "@react-native-async-storage/async-storage": "2.1.2",
     "@react-navigation/bottom-tabs": "^7.2.0",
     "@react-navigation/native": "^7.0.14",
+    "@repo/cms-types": "workspace:*",
     "expo": "~53.0.6",
     "expo-blur": "~14.1.4",
     "expo-constants": "~17.1.5",

@@ -7,9 +7,39 @@ import { IconSymbol } from '@/components/ui/IconSymbol';
 import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
+import { useAuth } from '../../src/contexts/AuthContext';
+import cartService from '../../src/api/cart';
+import { useEffect, useState } from 'react';
+import { useCartContext } from '../../src/contexts/CartContext';
 
 export default function TabLayout() {
   const colorScheme = useColorScheme();
+  const { user, isAuthenticated } = useAuth();
+  const [cartItemCount, setCartItemCount] = useState(0);
+  const { setRefreshCartCount } = useCartContext();
+
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      loadCartCount();
+    } else {
+      setCartItemCount(0);
+    }
+  }, [isAuthenticated, user]);
+
+  const loadCartCount = async () => {
+    if (!user) return;
+    try {
+      const cart = await cartService.getUserCart(user.id);
+      setCartItemCount(cart?.itemCount || 0);
+    } catch (error) {
+      console.error('Error loading cart count:', error);
+    }
+  };
+
+  // Register the refresh function with the cart context
+  useEffect(() => {
+    setRefreshCartCount(loadCartCount);
+  }, [user, isAuthenticated, setRefreshCartCount]);
 
   return (
     <Tabs
@@ -30,15 +60,23 @@ export default function TabLayout() {
       <Tabs.Screen
         name="index"
         options={{
-          title: 'Home',
+          title: 'Products',
           tabBarIcon: ({ color }) => <IconSymbol size={28} name="house.fill" color={color} />,
         }}
       />
       <Tabs.Screen
-        name="explore"
+        name="cart"
         options={{
-          title: 'Explore',
-          tabBarIcon: ({ color }) => <IconSymbol size={28} name="paperplane.fill" color={color} />,
+          title: 'Cart',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="cart.fill" color={color} />,
+          tabBarBadge: cartItemCount > 0 ? cartItemCount : undefined,
+        }}
+      />
+      <Tabs.Screen
+        name="profile"
+        options={{
+          title: 'Profile',
+          tabBarIcon: ({ color }) => <IconSymbol size={28} name="person.fill" color={color} />,
         }}
       />
     </Tabs>
