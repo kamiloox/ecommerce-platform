@@ -1,13 +1,21 @@
 'use client';
 import React from 'react';
 import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@heroui/react';
-import { ShoppingBagIcon, ShoppingCartIcon, LockIcon } from 'lucide-react';
+import { ShoppingBagIcon, ShoppingCartIcon, LockIcon, UserIcon } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface HeaderProps {
   currentPath?: string;
 }
 
 export const Header = ({ currentPath }: HeaderProps) => {
+  const { isAuthenticated } = useAuth();
+
+  // Check for stored auth immediately to prevent navigation delays
+  const hasStoredAuth =
+    typeof window !== 'undefined' &&
+    localStorage.getItem('auth_token') &&
+    localStorage.getItem('auth_user');
   return (
     <Navbar isBordered>
       <NavbarBrand>
@@ -44,11 +52,11 @@ export const Header = ({ currentPath }: HeaderProps) => {
           <Button
             as={Link}
             color="secondary"
-            href="/login"
+            href="/profile"
             variant="flat"
-            startContent={<LockIcon />}
+            startContent={isAuthenticated || hasStoredAuth ? <UserIcon /> : <LockIcon />}
           >
-            Account
+            {isAuthenticated || hasStoredAuth ? 'Profile' : 'Account'}
           </Button>
         </NavbarItem>
       </NavbarContent>

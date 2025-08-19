@@ -1,12 +1,16 @@
 import wretch from 'wretch';
 import { Cart } from '@repo/cms-types';
 import { getBaseUrl } from '@/utils/url';
+import authService from './auth';
 
 export const getUserCart = async (userId: number): Promise<Cart | null> => {
   const baseUrl = getBaseUrl();
 
   try {
-    const result = await wretch(`${baseUrl}/cms/cart?userId=${userId}`).get().json<Cart>();
+    const result = await wretch(`${baseUrl}/cms/cart?userId=${userId}`)
+      .headers(authService.getAuthHeaders())
+      .get()
+      .json<Cart>();
 
     return result;
   } catch (error) {
@@ -20,6 +24,7 @@ export const addToCart = async (userId: number, productId: number, quantity: num
 
   try {
     const result = await wretch(`${baseUrl}/cms/cart`)
+      .headers(authService.getAuthHeaders())
       .post({
         userId,
         productId,
@@ -39,6 +44,7 @@ export const removeFromCart = async (userId: number, productId: number) => {
 
   try {
     const result = await wretch(`${baseUrl}/cms/cart?userId=${userId}&productId=${productId}`)
+      .headers(authService.getAuthHeaders())
       .delete()
       .json<Cart>();
 
@@ -58,6 +64,7 @@ export const updateCartItemQuantity = async (
 
   try {
     const result = await wretch(`${baseUrl}/cms/cart`)
+      .headers(authService.getAuthHeaders())
       .patch({
         userId,
         productId,
@@ -76,7 +83,10 @@ export const clearCart = async (userId: number) => {
   const baseUrl = getBaseUrl();
 
   try {
-    const result = await wretch(`${baseUrl}/cms/cart?userId=${userId}`).delete().json<Cart>();
+    const result = await wretch(`${baseUrl}/cms/cart?userId=${userId}`)
+      .headers(authService.getAuthHeaders())
+      .delete()
+      .json<Cart>();
 
     return result;
   } catch (error) {

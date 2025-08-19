@@ -2,6 +2,7 @@ import wretch from 'wretch';
 import { Order } from '@repo/cms-types';
 import { getBaseUrl } from '@/utils/url';
 import { getCurrentUser } from './users';
+import authService from './auth';
 
 export interface CreateOrderData {
   items: Array<{
@@ -24,13 +25,16 @@ export const createOrder = async (orderData: CreateOrderData): Promise<Order> =>
   try {
     // Get current user data to include as customer
     const currentUser = await getCurrentUser();
-    
+
     const orderWithCustomer = {
       ...orderData,
-      customer: currentUser.user.id
+      customer: currentUser.user.id,
     };
 
-    const result = await wretch(`${baseUrl}/cms/orders`).post(orderWithCustomer).json<Order>();
+    const result = await wretch(`${baseUrl}/cms/orders`)
+      .headers(authService.getAuthHeaders())
+      .post(orderWithCustomer)
+      .json<Order>();
 
     return result;
   } catch (error) {
@@ -44,6 +48,7 @@ export const getUserOrders = async (userId: number): Promise<Order[]> => {
 
   try {
     const result = await wretch(`${baseUrl}/cms/orders?where[customer][equals]=${userId}`)
+      .headers(authService.getAuthHeaders())
       .get()
       .json<{ docs: Order[] }>();
 
@@ -60,8 +65,11 @@ export const getCurrentUserOrders = async (): Promise<Order[]> => {
   try {
     // Get current user data to fetch their orders
     const currentUser = await getCurrentUser();
-    
-    const result = await wretch(`${baseUrl}/cms/orders?where[customer][equals]=${currentUser.user.id}`)
+
+    const result = await wretch(
+      `${baseUrl}/cms/orders?where[customer][equals]=${currentUser.user.id}`,
+    )
+      .headers(authService.getAuthHeaders())
       .get()
       .json<{ docs: Order[] }>();
 
@@ -69,5 +77,24 @@ export const getCurrentUserOrders = async (): Promise<Order[]> => {
   } catch (error) {
     console.error('Failed to fetch current user orders:', error);
     return [];
+  }
+};
+
+export const getOrderById = async (orderId: number): Promise<Order | null> => {
+  const baseUrl = getBaseUrl();
+
+  try {
+    const result = await wretch(`${baseUrl}/cms/orders/${orderId}`)
+      .headers(authService.getAuthHeaders())
+      .get()
+      .json<Order>();
+
+    return result;
+  } catch (error) {
+    console.error('Failed to fetch order:', error);
+    if (error instanceof Error && error.message.includes('404')) {
+      return null;
+    }
+    throw error;
   }
 };

@@ -1,17 +1,19 @@
 'use client';
+
 import { FormEvent, useState } from 'react';
 import { Card, CardBody, Input, Button, Link, addToast } from '@heroui/react';
-import { LockIcon, MailIcon, KeyIcon } from 'lucide-react';
+import { UserPlusIcon, MailIcon, KeyIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { useAuthNavigation } from '@/hooks/useAuthNavigation';
 import { useRouter } from 'next/navigation';
 
-const Login = () => {
+const Register = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [passwordConfirm, setPasswordConfirm] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  const { login } = useAuth();
+  const { register } = useAuth();
   const router = useRouter();
 
   // This will automatically redirect if already authenticated
@@ -19,16 +21,22 @@ const Login = () => {
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
+
+    if (password !== passwordConfirm) {
+      addToast({ title: 'Passwords do not match', color: 'danger' });
+      return;
+    }
+
     setIsLoading(true);
 
     try {
-      const result = await login({ email, password });
+      const result = await register({ email, password, passwordConfirm });
 
       if (result.success) {
-        addToast({ title: 'Login successful', color: 'success' });
+        addToast({ title: 'Registration successful', color: 'success' });
         router.push('/profile');
       } else {
-        addToast({ title: result.message || 'Login failed', color: 'danger' });
+        addToast({ title: result.message || 'Registration failed', color: 'danger' });
       }
     } catch {
       addToast({ title: 'An unexpected error occurred', color: 'danger' });
@@ -41,11 +49,11 @@ const Login = () => {
     <div className="w-full">
       <div className="px-4 py-8 max-w-md mx-auto">
         <div className="text-center mb-6">
-          <div className="w-16 h-16 bg-blue-600 rounded-full mx-auto mb-4 flex items-center justify-center">
-            <LockIcon size={24} className="text-white" />
+          <div className="w-16 h-16 bg-green-600 rounded-full mx-auto mb-4 flex items-center justify-center">
+            <UserPlusIcon size={24} className="text-white" />
           </div>
-          <h1 className="text-xl font-bold mb-2">Welcome Back</h1>
-          <p className="text-gray-600 text-sm">Sign in to your account to continue</p>
+          <h1 className="text-xl font-bold mb-2">Create Account</h1>
+          <p className="text-gray-600 text-sm">Join us to start shopping and get exclusive deals</p>
         </div>
 
         <Card className="shadow-lg">
@@ -69,6 +77,15 @@ const Login = () => {
                 startContent={<KeyIcon size={16} className="text-gray-400" />}
                 isRequired
               />
+              <Input
+                type="password"
+                label="Confirm Password"
+                placeholder="Confirm your password"
+                value={passwordConfirm}
+                onValueChange={setPasswordConfirm}
+                startContent={<KeyIcon size={16} className="text-gray-400" />}
+                isRequired
+              />
 
               <div className="space-y-3 pt-2">
                 <Button
@@ -78,20 +95,14 @@ const Login = () => {
                   isLoading={isLoading}
                   disabled={isLoading}
                 >
-                  {isLoading ? 'Signing in...' : 'Sign In'}
+                  {isLoading ? 'Creating Account...' : 'Sign Up'}
                 </Button>
-
-                <div className="text-center">
-                  <Link href="#" className="text-sm text-primary hover:underline">
-                    Forgot password?
-                  </Link>
-                </div>
 
                 <div className="text-center pt-2">
                   <p className="text-sm text-gray-600">
-                    Don&apos;t have an account?{' '}
-                    <Link href="/register" className="text-primary hover:underline font-medium">
-                      Create Account
+                    Already have an account?{' '}
+                    <Link href="/login" className="text-primary hover:underline font-medium">
+                      Sign In
                     </Link>
                   </p>
                 </div>
@@ -104,4 +115,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default Register;
