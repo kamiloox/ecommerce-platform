@@ -13,7 +13,8 @@ import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { Cart } from '@repo/cms-types';
 import cartService from '../../src/api/cart';
-import { getProductImageUrl } from '../../src/api/client';
+import { getProductImageUrl } from '@repo/shared-utils/products';
+import { getApiBaseUrl } from '@repo/shared-utils/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useCartContext } from '../../src/contexts/CartContext';
 import { useCallback } from 'react';
@@ -256,7 +257,7 @@ export default function CartScreen() {
                   >
                     <Card.Cover
                       source={{
-                        uri: getProductImageUrl(product),
+                        uri: getProductImageUrl(product, getApiBaseUrl().replace('/api', '')),
                       }}
                       style={{ height: 120, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
                     />

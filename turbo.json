@@ -1,5 +1,9 @@
 {
   "$schema": "https://turbo.build/schema.v1.json",
+  "globalEnv": [
+    "EXPO_PUBLIC_API_URL",
+    "NEXT_PUBLIC_API_URL"
+  ],
   "pipeline": {
     "lint": {
       "outputs": []
@@ -7,6 +11,9 @@
     "test": {
       "dependsOn": ["build"],
       "inputs": ["**/*.{ts,tsx,js,jsx}"]
+    },
+    "type-check": {
+      "outputs": []
     },
     "build": {
       "dependsOn": ["^build"],

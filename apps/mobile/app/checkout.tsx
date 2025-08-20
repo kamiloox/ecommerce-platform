@@ -13,7 +13,7 @@ import {
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Cart } from '@repo/cms-types';
-import cartService from '../src/api/cart';
+import { cartService } from '../src/services/api';
 import orderService, { ShippingAddress } from '../src/api/orders';
 import { useAuth } from '../src/contexts/AuthContext';
 import { useCartContext } from '../src/contexts/CartContext';
@@ -43,14 +43,14 @@ export default function CheckoutScreen() {
     }
 
     try {
-      const data = await cartService.getUserCart(user.id);
-      if (!data || !data.items || data.items.length === 0) {
+      const response = await cartService.getUserCart(user.id);
+      if (response.error || !response.data || !response.data.items || response.data.items.length === 0) {
         Alert.alert('Empty Cart', 'Your cart is empty. Add some items first!', [
           { text: 'Browse Products', onPress: () => router.replace('/(tabs)') },
         ]);
         return;
       }
-      setCart(data);
+      setCart(response.data);
     } catch (err) {
       console.error('Error loading cart:', err);
       Alert.alert('Error', 'Failed to load cart', [{ text: 'OK', onPress: () => router.back() }]);

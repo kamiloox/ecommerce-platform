@@ -1,15 +1,24 @@
 import { Product, ProductsResult } from '@repo/cms-types';
 import authService from './auth';
+import Constants from 'expo-constants';
 
-// Configuration
-const API_BASE_URL = __DEV__
-  ? 'http://192.168.0.6:3000' // Your machine's IP address for development (backend port)
-  : 'https://your-production-api.com'; // Replace with your production URL
+// Get API URL from environment variables
+const getApiBaseUrl = (): string => {
+  const envApiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
+  if (!envApiUrl) {
+    throw new Error('EXPO_PUBLIC_API_URL environment variable is required. Please set it in your .env file.');
+  }
+  return envApiUrl;
+};
 
-// Alternative options if the above doesn't work:
-// - Android emulator: 'http://10.0.2.2:3000'
-// - iOS simulator: 'http://localhost:3000' might work
-// - Physical device: Use your machine's IP address (192.168.0.6:3000)
+const API_BASE_URL = getApiBaseUrl();
+
+// Note: Make sure to set EXPO_PUBLIC_API_URL in your .env file
+// Examples:
+// - For physical device: http://192.168.x.x:3001 (your computer's IP)
+// - For iOS simulator: http://localhost:3001
+// - For Android emulator: http://10.0.2.2:3001
+// - For production: https://your-api-domain.com
 
 interface ApiResponse<T> {
   data?: T;

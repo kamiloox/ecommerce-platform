@@ -1,5 +1,6 @@
 'use client';
-import { getManyProducts } from '@/api/products';
+import { ProductsResult } from '@repo/cms-types';
+import { getManyProducts } from '@/lib/api';
 import { getImageUrl } from '@/utils/image';
 import { Card, CardBody, CardFooter, Image, Button } from '@heroui/react';
 import { useQuery } from '@tanstack/react-query';

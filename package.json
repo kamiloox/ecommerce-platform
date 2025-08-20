@@ -2,6 +2,7 @@
   "private": true,
   "name": "@repo/ecommerce-platform",
   "scripts": {
+    "check-env": "./check-env.sh",
     "dev": "turbo dev",
     "dev:mobile": "turbo dev --filter=\"{./apps/mobile}...\"",
     "lint": "turbo lint",
@@ -19,5 +20,8 @@
     "singleQuote": true,
     "trailingComma": "all",
     "semi": true
+  },
+  "dependencies": {
+    "node-fetch": "3.3.2"
   }
 }

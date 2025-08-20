@@ -1,7 +1,20 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@repo/cms-types';
+import Constants from 'expo-constants';
 
-const API_BASE_URL = __DEV__ ? 'http://192.168.0.6:3000' : 'https://your-production-api.com';
+// Get API URL from environment variables
+const getApiBaseUrl = (): string => {
+  // Try to get from Expo Constants (configured in app.config.js)
+  const envApiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
+  
+  if (!envApiUrl) {
+    throw new Error('EXPO_PUBLIC_API_URL environment variable is required. Please set it in your .env file.');
+  }
+  
+  return envApiUrl;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 const TOKEN_KEY = '@ecommerce_auth_token';
 const USER_KEY = '@ecommerce_user';

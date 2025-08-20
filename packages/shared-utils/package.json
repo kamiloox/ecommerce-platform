@@ -1,0 +1,23 @@
+{
+  "name": "@repo/shared-utils",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./api": "./src/api.ts",
+    "./auth": "./src/auth.ts",
+    "./cart": "./src/cart.ts",
+    "./products": "./src/products.ts",
+    "./storage": "./src/storage.ts",
+    "./types": "./src/types.ts"
+  },
+  "scripts": {
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@repo/typescript-config": "workspace:*",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "@repo/cms-types": "workspace:*"
+  }
+}

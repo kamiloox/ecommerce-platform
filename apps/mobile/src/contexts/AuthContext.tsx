@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from '@repo/cms-types';
-import authService, { LoginCredentials, RegisterCredentials, AuthResponse } from '../api/auth';
+import { authService, LoginCredentials, RegisterCredentials, AuthResponse } from '../services/api';
 
 interface AuthContextType {
   user: User | null;
@@ -40,11 +40,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       await authService.init();
 
       // Check if we have a stored token and user
-      const currentUser = authService.getUser();
-      if (currentUser && authService.getToken()) {
+      const currentUser = await authService.getUser();
+      if (currentUser && await authService.getToken()) {
         // Verify the token is still valid
-        const refreshedUser = await authService.getCurrentUser();
-        setUser(refreshedUser);
+        const isValid = await authService.validateToken();
+        if (isValid) {
+          setUser(currentUser);
+        }
       }
     } catch (error) {
       console.error('Error initializing auth:', error);
@@ -75,13 +77,22 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshUser = async (): Promise<void> => {
-    const currentUser = await authService.getCurrentUser();
-    setUser(currentUser);
+    const currentUser = await authService.getUser();
+    if (currentUser) {
+      const isValid = await authService.validateToken();
+      if (isValid) {
+        setUser(currentUser);
+      } else {
+        setUser(null);
+      }
+    } else {
+      setUser(null);
+    }
   };
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user && authService.isAuthenticated(),
+    isAuthenticated: !!user,
     isLoading,
     login,
     register,

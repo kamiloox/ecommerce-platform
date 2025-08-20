@@ -8,7 +8,7 @@ import TabBarBackground from '@/components/ui/TabBarBackground';
 import { Colors } from '@/constants/Colors';
 import { useColorScheme } from '@/hooks/useColorScheme';
 import { useAuth } from '../../src/contexts/AuthContext';
-import cartService from '../../src/api/cart';
+import { cartService } from '../../src/services/api';
 import { useEffect, useState } from 'react';
 import { useCartContext } from '../../src/contexts/CartContext';
 
@@ -29,8 +29,8 @@ export default function TabLayout() {
   const loadCartCount = async () => {
     if (!user) return;
     try {
-      const cart = await cartService.getUserCart(user.id);
-      setCartItemCount(cart?.itemCount || 0);
+      const response = await cartService.getUserCart(user.id);
+      setCartItemCount(response.data?.itemCount || 0);
     } catch (error) {
       console.error('Error loading cart count:', error);
     }

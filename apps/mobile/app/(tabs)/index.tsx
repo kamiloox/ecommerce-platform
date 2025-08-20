@@ -6,7 +6,8 @@ import { router } from 'expo-router';
 import { Product } from '@repo/cms-types';
 import productsService from '../../src/api/products';
 import cartService from '../../src/api/cart';
-import { getProductImageUrl } from '../../src/api/client';
+import { getProductImageUrl } from '@repo/shared-utils/products';
+import { getApiBaseUrl } from '@repo/shared-utils/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useCartContext } from '../../src/contexts/CartContext';
 
@@ -140,7 +141,7 @@ export default function ProductsScreen() {
             >
               <Card.Cover
                 source={{
-                  uri: getProductImageUrl(product),
+                  uri: getProductImageUrl(product, getApiBaseUrl().replace('/api', '')),
                 }}
                 style={{ height: 200, borderTopLeftRadius: 12, borderTopRightRadius: 12 }}
               />

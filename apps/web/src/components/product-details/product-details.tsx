@@ -6,7 +6,7 @@ import { TruckIcon, RepeatIcon, ShieldCheckIcon, ShoppingCartIcon } from 'lucide
 import { RichText, defaultJSXConverters } from '@payloadcms/richtext-lexical/react';
 import { getImageUrl } from '@/utils/image';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { getProduct } from '@/api/products';
+import { getProduct } from '@/lib/api';
 import { addToCart } from '@/api/cart';
 import { getCurrentUser } from '@/api/users';
 

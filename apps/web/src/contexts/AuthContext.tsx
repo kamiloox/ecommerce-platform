@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useEffect, useState, ReactNode } from 'react';
 import { User } from '@repo/cms-types';
-import authService, { LoginCredentials, RegisterCredentials, AuthResponse } from '../api/auth';
+import { authService, LoginCredentials, RegisterCredentials, AuthResponse } from '../lib/api';
 
 interface AuthContextType {
   user: User | null;
@@ -29,23 +29,8 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(() => {
-    // Initialize from authService immediately
-    if (typeof window !== 'undefined') {
-      return authService.getUser();
-    }
-    return null;
-  });
-
-  const [isLoading, setIsLoading] = useState(() => {
-    // Only show loading if we truly don't have any data
-    if (typeof window !== 'undefined') {
-      const storedUser = authService.getUser();
-      const storedToken = authService.getToken();
-      return !(storedUser && storedToken);
-    }
-    return true;
-  });
+  const [user, setUser] = useState<User | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [isHydrated, setIsHydrated] = useState(false);
 
@@ -58,9 +43,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       // Set hydrated immediately
       setIsHydrated(true);
 
-      // Get stored data
-      const storedUser = authService.getUser();
-      const storedToken = authService.getToken();
+      // Initialize auth service and get stored data
+      await authService.init();
+      const storedUser = await authService.getUser();
+      const storedToken = await authService.getToken();
 
       if (storedUser && storedToken) {
         setUser(storedUser);
@@ -68,10 +54,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
         // Validate token in background
         try {
-          const refreshedUser = await authService.getCurrentUser();
-          if (refreshedUser) {
-            setUser(refreshedUser);
-          } else {
+          const isValid = await authService.validateToken();
+          if (!isValid) {
             setUser(null);
           }
         } catch (error) {
@@ -111,8 +95,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const refreshUser = async (): Promise<void> => {
     try {
-      const refreshedUser = await authService.getCurrentUser();
-      setUser(refreshedUser);
+      const currentUser = await authService.getUser();
+      if (currentUser) {
+        const isValid = await authService.validateToken();
+        if (isValid) {
+          setUser(currentUser);
+        } else {
+          setUser(null);
+        }
+      } else {
+        setUser(null);
+      }
     } catch (error) {
       console.error('Error refreshing user:', error);
       setUser(null);
@@ -121,7 +114,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const value: AuthContextType = {
     user,
-    isAuthenticated: !!user && !!authService.getToken(),
+    isAuthenticated: !!user,
     isLoading: isLoading || !isHydrated,
     login,
     register,

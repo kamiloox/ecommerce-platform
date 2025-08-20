@@ -1,4 +1,4 @@
-import { Product, User } from './types';
+import { Product, User, Cart } from './types';
 export * from './types';
 
 export interface Pagination<T> {
@@ -21,3 +21,23 @@ export type CurrentUser = {
   token: string;
   exp: number;
 };
+
+// API-related types that extend CMS types
+export interface CartWithItems extends Omit<Cart, 'items'> {
+  items: Array<{
+    id?: string | null;
+    product: Product;
+    quantity: number;
+    unitPrice: number;
+  }>;
+}
+
+// Query parameter types for API calls
+export interface ProductsQuery {
+  page?: number;
+  limit?: number;
+  status?: 'published' | 'draft' | 'archived';
+  featured?: boolean;
+  category?: string;
+  search?: string;
+}

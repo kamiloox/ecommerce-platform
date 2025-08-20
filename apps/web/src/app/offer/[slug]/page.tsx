@@ -1,7 +1,7 @@
 import React from 'react';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 import { ProductDetails } from '@/components/product-details/product-details';
-import { getProduct } from '@/api/products';
+import { getProduct } from '@/lib/api';
 
 const ProductPage = async ({ params }: { params: { slug: string } }) => {
   const queryClient = new QueryClient();
