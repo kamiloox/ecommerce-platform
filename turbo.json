@@ -1,27 +1,17 @@
 {
   "$schema": "https://turbo.build/schema.v1.json",
-  "globalEnv": [
-    "EXPO_PUBLIC_API_URL",
-    "NEXT_PUBLIC_API_URL"
-  ],
+  "globalEnv": ["EXPO_PUBLIC_API_URL", "NEXT_PUBLIC_API_URL", "PAYLOAD_SECRET", "DATABASE_URI"],
   "pipeline": {
-    "lint": {
-      "outputs": []
-    },
+    "lint": { "outputs": [] },
     "test": {
       "dependsOn": ["build"],
       "inputs": ["**/*.{ts,tsx,js,jsx}"]
     },
-    "type-check": {
-      "outputs": []
-    },
+    "type-check": { "outputs": [] },
     "build": {
       "dependsOn": ["^build"],
       "outputs": ["build/**", "node_modules/.cache/metro/**"]
     },
-    "dev": {
-      "cache": false,
-      "persistent": true
-    }
+    "dev": { "cache": false, "persistent": true }
   }
 }
