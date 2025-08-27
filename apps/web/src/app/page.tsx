@@ -1,13 +1,10 @@
 import React from 'react';
-import Link from 'next/link';
-import { Button } from '@heroui/react';
-import { Product, ProductsResult } from '@repo/cms-types';
 import { dehydrate, HydrationBoundary, QueryClient } from '@tanstack/react-query';
 import { Pagination } from '@heroui/react';
 import { Products } from '@/components/products/products';
 import { getManyProducts } from '@/lib/api';
 
-const Home = async ({ searchParams }: { searchParams: { page: string } }) => {
+const Home = async ({ searchParams }: { searchParams: Promise<{ page: string }> }) => {
   const queryClient = new QueryClient();
 
   const { page } = await searchParams;
