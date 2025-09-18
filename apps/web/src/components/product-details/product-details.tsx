@@ -9,6 +9,8 @@ import { useMutation, useQuery } from '@tanstack/react-query';
 import { getProduct } from '@/lib/api';
 import { addToCart } from '@/api/cart';
 import { getCurrentUser } from '@/api/users';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRouter } from 'next/navigation';
 
 interface ProductDetailsProps {
   slug: string;
@@ -25,6 +27,8 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
     queryFn: getCurrentUser,
   });
 
+  const { isAuthenticated } = useAuth();
+  const router = useRouter();
   const [quantity, setQuantity] = React.useState(1);
 
   const handleQuantityChange = (value: string) => {
@@ -32,6 +36,25 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
     if (!isNaN(newQuantity) && newQuantity > 0) {
       setQuantity(newQuantity);
     }
+  };
+
+  const handleAddToCart = () => {
+    if (!data) return;
+
+    if (!isAuthenticated || !currentUser?.user?.id) {
+      addToast({
+        title: '🔒 Please sign in to add items to your cart',
+        color: 'warning',
+      });
+
+      // Redirect to login after a brief delay
+      setTimeout(() => {
+        router.push('/login');
+      }, 1000);
+      return;
+    }
+
+    mutate({ userId: currentUser.user.id, productId: data.id, quantity });
   };
 
   const { mutate } = useMutation({
@@ -135,13 +158,7 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
                 min={1}
                 className="w-24"
               />
-              <Button
-                color="primary"
-                className="flex-grow"
-                onClick={() =>
-                  mutate({ userId: currentUser?.user.id || NaN, productId: data.id, quantity })
-                }
-              >
+              <Button color="primary" className="flex-grow" onClick={handleAddToCart}>
                 <ShoppingCartIcon className="mr-2" />
                 Add to Cart
               </Button>

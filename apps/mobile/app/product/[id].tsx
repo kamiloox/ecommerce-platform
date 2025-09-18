@@ -1,6 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, Image, Dimensions, Alert } from 'react-native';
-import { Card, Text, Button, Surface, IconButton, Chip, Divider, List } from 'react-native-paper';
+import {
+  Card,
+  Text,
+  Button,
+  Surface,
+  IconButton,
+  Chip,
+  Divider,
+  List,
+  Snackbar,
+} from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { Product } from '@repo/cms-types';
@@ -19,6 +29,8 @@ export default function ProductDetailsScreen() {
   const [loading, setLoading] = useState(true);
   const [quantity, setQuantity] = useState(1);
   const [addingToCart, setAddingToCart] = useState(false);
+  const [showAuthSnackbar, setShowAuthSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
   const screenWidth = Dimensions.get('window').width;
 
   useEffect(() => {
@@ -28,6 +40,19 @@ export default function ProductDetailsScreen() {
       try {
         setLoading(true);
         const productData = await productsService.getProductById(id);
+        console.log('🔍 [ProductDetails] Loaded product data:', JSON.stringify({
+          id: productData?.id,
+          name: productData?.name,
+          quantity: productData?.quantity,
+          status: productData?.status,
+          price: productData?.price,
+        }, null, 2));
+        
+        // Ensure quantity is a number
+        if (productData) {
+          productData.quantity = productData.quantity !== null && productData.quantity !== undefined ? Number(productData.quantity) : 0;
+        }
+        
         setProduct(productData);
       } catch (error) {
         console.error('Error loading product:', error);
@@ -118,10 +143,16 @@ export default function ProductDetailsScreen() {
 
   const handleAddToCart = async () => {
     if (!isAuthenticated || !user) {
-      Alert.alert('Login Required', 'Please login to add items to cart', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Login', onPress: () => router.push('/login') },
-      ]);
+      setSnackbarMessage('🔒 Please sign in to add items to your cart');
+      setShowAuthSnackbar(true);
+
+      // Show the alert after a brief delay so user sees the snackbar first
+      setTimeout(() => {
+        Alert.alert('Login Required', 'Please sign in to add items to your cart', [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign In', onPress: () => router.push('/login') },
+        ]);
+      }, 500);
       return;
     }
 
@@ -394,58 +425,68 @@ export default function ProductDetailsScreen() {
               backgroundColor: 'white',
             }}
           >
-            {(product.quantity || 0) > 0 ? (
-              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
-                {/* Quantity Selector */}
-                <View style={{ flexDirection: 'row', alignItems: 'center' }}>
-                  <Text variant="bodyMedium" style={{ marginRight: 12 }}>
-                    Qty:
-                  </Text>
-                  <IconButton
-                    icon="minus"
-                    size={20}
-                    mode="outlined"
-                    onPress={() => handleQuantityChange(-1)}
-                    disabled={quantity <= 1}
-                  />
-                  <Text
-                    variant="titleMedium"
-                    style={{
-                      marginHorizontal: 16,
-                      minWidth: 30,
-                      textAlign: 'center',
-                    }}
-                  >
-                    {quantity}
-                  </Text>
-                  <IconButton
-                    icon="plus"
-                    size={20}
-                    mode="outlined"
-                    onPress={() => handleQuantityChange(1)}
-                    disabled={quantity >= (product.quantity || 0)}
-                  />
-                </View>
-
-                {/* Add to Cart Button */}
-                <Button
-                  mode="contained"
-                  icon="cart-plus"
-                  onPress={handleAddToCart}
-                  loading={addingToCart}
-                  disabled={addingToCart}
-                  style={{ flex: 1 }}
-                  contentStyle={{ paddingVertical: 8 }}
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 16 }}>
+              {/* Quantity Selector */}
+              <View style={{ flexDirection: 'row', alignItems: 'center' }}>
+                <Text variant="bodyMedium" style={{ marginRight: 12 }}>
+                  Qty:
+                </Text>
+                <IconButton
+                  icon="minus"
+                  size={20}
+                  mode="outlined"
+                  onPress={() => handleQuantityChange(-1)}
+                  disabled={quantity <= 1}
+                />
+                <Text
+                  variant="titleMedium"
+                  style={{
+                    marginHorizontal: 16,
+                    minWidth: 30,
+                    textAlign: 'center',
+                  }}
                 >
-                  {addingToCart ? 'Adding...' : 'Add to Cart'}
-                </Button>
+                  {quantity}
+                </Text>
+                <IconButton
+                  icon="plus"
+                  size={20}
+                  mode="outlined"
+                  onPress={() => handleQuantityChange(1)}
+                  disabled={quantity >= 10} // Max 10 items
+                />
               </View>
-            ) : (
-              <Button mode="outlined" icon="bell-ring" disabled style={{ opacity: 0.6 }}>
-                Out of Stock
+
+              {/* Add to Cart Button */}
+              <Button
+                mode="contained"
+                icon="cart-plus"
+                onPress={handleAddToCart}
+                loading={addingToCart}
+                disabled={addingToCart}
+                style={{ flex: 1 }}
+                contentStyle={{ paddingVertical: 8 }}
+              >
+                {addingToCart ? 'Adding...' : 'Add to Cart'}
               </Button>
-            )}
+            </View>
           </Surface>
+
+          {/* Authentication Snackbar */}
+          <Snackbar
+            visible={showAuthSnackbar}
+            onDismiss={() => setShowAuthSnackbar(false)}
+            duration={3000}
+            action={{
+              label: 'Sign In',
+              onPress: () => {
+                setShowAuthSnackbar(false);
+                router.push('/login');
+              },
+            }}
+          >
+            {snackbarMessage}
+          </Snackbar>
         </SafeAreaView>
       </SafeAreaProvider>
     </>

@@ -1,12 +1,13 @@
 import React from 'react';
 import { ScrollView, View, Alert } from 'react-native';
 import { Card, Text, Button, Avatar, Surface, Divider } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { useAuth } from '../../src/contexts/AuthContext';
 
 export default function ProfileScreen() {
   const { user, logout, isAuthenticated, isLoading } = useAuth();
+  const insets = useSafeAreaInsets();
 
   const handleLogout = async () => {
     Alert.alert('Logout', 'Are you sure you want to logout?', [
@@ -44,7 +45,14 @@ export default function ProfileScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+          <Surface
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              paddingTop: Math.max(8, insets.top),
+              elevation: 2,
+            }}
+          >
             <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
               Profile
             </Text>
@@ -85,7 +93,14 @@ export default function ProfileScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-        <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+        <Surface
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            paddingTop: Math.max(8, insets.top),
+            elevation: 2,
+          }}
+        >
           <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
             Profile
           </Text>

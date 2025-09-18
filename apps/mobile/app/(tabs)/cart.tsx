@@ -9,7 +9,7 @@ import {
   Avatar,
   IconButton,
 } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router, useFocusEffect } from 'expo-router';
 import { Cart } from '@repo/cms-types';
 import cartService from '../../src/api/cart';
@@ -22,6 +22,7 @@ import { useCallback } from 'react';
 export default function CartScreen() {
   const { user, isAuthenticated } = useAuth();
   const { refreshCartCount } = useCartContext();
+  const insets = useSafeAreaInsets();
   const [cart, setCart] = useState<Cart | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
@@ -115,7 +116,14 @@ export default function CartScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+          <Surface
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              paddingTop: Math.max(8, insets.top),
+              elevation: 2,
+            }}
+          >
             <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
               Cart
             </Text>
@@ -154,7 +162,14 @@ export default function CartScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+          <Surface
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              paddingTop: Math.max(8, insets.top),
+              elevation: 2,
+            }}
+          >
             <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
               Cart
             </Text>
@@ -174,7 +189,14 @@ export default function CartScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+          <Surface
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              paddingTop: Math.max(8, insets.top),
+              elevation: 2,
+            }}
+          >
             <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
               Cart
             </Text>
@@ -207,12 +229,18 @@ export default function CartScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-        <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+        <Surface
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            paddingTop: Math.max(8, insets.top),
+            elevation: 2,
+          }}
+        >
           <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
             Cart {cart && cart.itemCount > 0 && `(${cart.itemCount} items)`}
           </Text>
-        </Surface>
-
+        </Surface>{' '}
         <ScrollView
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}

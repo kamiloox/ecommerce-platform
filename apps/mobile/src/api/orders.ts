@@ -1,15 +1,8 @@
 import { Order } from '@repo/cms-types';
 import authService from './auth';
-import Constants from 'expo-constants';
 
 // Get API URL from environment variables
-const getApiBaseUrl = (): string => {
-  const envApiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
-  if (!envApiUrl) {
-    throw new Error('EXPO_PUBLIC_API_URL environment variable is required. Please set it in your .env file.');
-  }
-  return envApiUrl;
-};
+import { getApiBaseUrl } from '@repo/shared-utils/api';
 
 const API_BASE_URL = getApiBaseUrl();
 

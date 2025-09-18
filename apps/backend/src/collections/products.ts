@@ -102,6 +102,7 @@ export const Products: CollectionConfig = {
       type: 'number',
       label: 'Quantity',
       min: 0,
+      defaultValue: 0,
       admin: {
         step: 1,
         description: 'Available stock quantity for the product',

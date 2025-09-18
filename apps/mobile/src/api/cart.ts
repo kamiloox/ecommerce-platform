@@ -1,15 +1,6 @@
 import { Product } from '@repo/cms-types';
 import authService from './auth';
-import Constants from 'expo-constants';
-
-// Get API URL from environment variables
-const getApiBaseUrl = (): string => {
-  const envApiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
-  if (!envApiUrl) {
-    throw new Error('EXPO_PUBLIC_API_URL environment variable is required. Please set it in your .env file.');
-  }
-  return envApiUrl;
-};
+import { getApiBaseUrl } from '@repo/shared-utils/api';
 
 const API_BASE_URL = getApiBaseUrl();
 
@@ -33,7 +24,7 @@ export interface CartResponse {
 class CartService {
   async getUserCart(userId: number): Promise<CartResponse | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/cart?userId=${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/cart?userId=${userId}`, {
         headers: authService.getAuthHeaders(),
       });
 
@@ -54,7 +45,7 @@ class CartService {
 
   async addToCart(userId: number, productId: number, quantity: number = 1): Promise<CartResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/cart`, {
+      const response = await fetch(`${API_BASE_URL}/cart`, {
         method: 'POST',
         headers: authService.getAuthHeaders(),
         body: JSON.stringify({
@@ -78,13 +69,10 @@ class CartService {
 
   async removeFromCart(userId: number, productId: number): Promise<CartResponse> {
     try {
-      const response = await fetch(
-        `${API_BASE_URL}/api/cart?userId=${userId}&productId=${productId}`,
-        {
-          method: 'DELETE',
-          headers: authService.getAuthHeaders(),
-        },
-      );
+      const response = await fetch(`${API_BASE_URL}/cart?userId=${userId}&productId=${productId}`, {
+        method: 'DELETE',
+        headers: authService.getAuthHeaders(),
+      });
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -104,7 +92,7 @@ class CartService {
     quantity: number,
   ): Promise<CartResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/cart`, {
+      const response = await fetch(`${API_BASE_URL}/cart`, {
         method: 'PATCH',
         headers: authService.getAuthHeaders(),
         body: JSON.stringify({
@@ -128,7 +116,7 @@ class CartService {
 
   async clearCart(userId: number): Promise<CartResponse> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/cart?userId=${userId}`, {
+      const response = await fetch(`${API_BASE_URL}/cart?userId=${userId}`, {
         method: 'DELETE',
         headers: authService.getAuthHeaders(),
       });

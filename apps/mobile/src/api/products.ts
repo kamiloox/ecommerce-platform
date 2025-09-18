@@ -12,8 +12,7 @@ class ProductsServiceImpl implements ProductsService {
     try {
       const response = await sharedProductsService.getProducts({
         limit: 50, // Get more products for mobile display
-        // Note: Removed status filter to show all products during development
-        // Add back: status: 'published' for production
+        status: 'published', // Only show published products
       });
 
       if (response.error) {

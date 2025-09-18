@@ -1,42 +1,12 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@repo/cms-types';
-import Constants from 'expo-constants';
-
-// Get API URL from environment variables
-const getApiBaseUrl = (): string => {
-  // Try to get from Expo Constants (configured in app.config.js)
-  const envApiUrl = Constants.expoConfig?.extra?.EXPO_PUBLIC_API_URL;
-  
-  if (!envApiUrl) {
-    throw new Error('EXPO_PUBLIC_API_URL environment variable is required. Please set it in your .env file.');
-  }
-  
-  return envApiUrl;
-};
+import { getApiBaseUrl } from '@repo/shared-utils/api';
+import { AuthResponse, LoginCredentials, RegisterCredentials } from '@repo/shared-utils/types';
 
 const API_BASE_URL = getApiBaseUrl();
 
 const TOKEN_KEY = '@ecommerce_auth_token';
 const USER_KEY = '@ecommerce_user';
-
-export interface LoginCredentials {
-  email: string;
-  password: string;
-}
-
-export interface RegisterCredentials {
-  email: string;
-  password: string;
-  passwordConfirm?: string;
-}
-
-export interface AuthResponse {
-  success: boolean;
-  user?: User;
-  token?: string;
-  message?: string;
-  exp?: number;
-}
 
 class AuthService {
   private token: string | null = null;

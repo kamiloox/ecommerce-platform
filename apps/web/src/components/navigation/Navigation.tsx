@@ -28,14 +28,18 @@ export function Navigation() {
       isActive: pathname === '/',
       isLink: true,
     },
-    {
-      name: 'Cart',
-      href: '/cart',
-      icon: ShoppingCartIcon,
-      isActive: pathname === '/cart',
-      badge: itemCount > 0 ? itemCount : undefined,
-      isLink: true,
-    },
+    ...(isAuthenticated || hasStoredAuth
+      ? [
+          {
+            name: 'Cart',
+            href: '/cart',
+            icon: ShoppingCartIcon,
+            isActive: pathname === '/cart',
+            badge: itemCount > 0 ? itemCount : undefined,
+            isLink: true,
+          },
+        ]
+      : []),
     {
       name: isAuthenticated || hasStoredAuth ? 'Profile' : 'Account',
       href: '/profile',

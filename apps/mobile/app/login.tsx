@@ -9,7 +9,6 @@ import {
   Avatar,
   Snackbar,
 } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
 import { router, Stack } from 'expo-router';
 import { useAuth } from '../src/contexts/AuthContext';
 
@@ -60,7 +59,6 @@ export default function LoginScreen() {
       <Stack.Screen
         options={{
           title: 'Sign In',
-          headerShown: true,
           headerStyle: {
             backgroundColor: '#fff',
           },
@@ -72,13 +70,12 @@ export default function LoginScreen() {
           headerShadowVisible: true,
         }}
       />
-
-      <SafeAreaProvider>
-        <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <KeyboardAvoidingView
-            style={{ flex: 1 }}
-            behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-          >
+      
+      <View style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        >
             <ScrollView
               contentContainerStyle={{
                 flexGrow: 1,
@@ -186,8 +183,7 @@ export default function LoginScreen() {
           >
             {errorMessage}
           </Snackbar>
-        </SafeAreaView>
-      </SafeAreaProvider>
+        </View>
     </>
   );
 }

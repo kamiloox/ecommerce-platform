@@ -37,17 +37,19 @@ export const Header = ({ currentPath }: HeaderProps) => {
         </NavbarItem>
       </NavbarContent>
       <NavbarContent justify="end">
-        <NavbarItem>
-          <Button
-            as={Link}
-            color="primary"
-            href="/checkout"
-            variant="flat"
-            startContent={<ShoppingCartIcon />}
-          >
-            Cart
-          </Button>
-        </NavbarItem>
+        {(isAuthenticated || hasStoredAuth) && (
+          <NavbarItem>
+            <Button
+              as={Link}
+              color="primary"
+              href="/checkout"
+              variant="flat"
+              startContent={<ShoppingCartIcon />}
+            >
+              Cart
+            </Button>
+          </NavbarItem>
+        )}
         <NavbarItem>
           <Button
             as={Link}

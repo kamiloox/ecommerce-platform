@@ -1,7 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, RefreshControl, View, Alert } from 'react-native';
-import { Card, Text, Button, Chip, Surface, ActivityIndicator, Avatar } from 'react-native-paper';
-import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
+import {
+  Card,
+  Text,
+  Button,
+  Chip,
+  Surface,
+  ActivityIndicator,
+  Avatar,
+  Snackbar,
+} from 'react-native-paper';
+import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
 import { Product } from '@repo/cms-types';
 import productsService from '../../src/api/products';
@@ -14,17 +23,36 @@ import { useCartContext } from '../../src/contexts/CartContext';
 export default function ProductsScreen() {
   const { user, isAuthenticated } = useAuth();
   const { refreshCartCount } = useCartContext();
+  const insets = useSafeAreaInsets();
   const [products, setProducts] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState<number | null>(null);
+  const [showAuthSnackbar, setShowAuthSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState('');
 
   const loadProducts = async () => {
     try {
       setError(null);
       const data = await productsService.getProducts();
-      setProducts(data);
+      console.log('🔍 [ProductsList] Loaded products:', data.length);
+      console.log('🔍 [ProductsList] Sample product quantities:', 
+        data.slice(0, 3).map(p => ({ 
+          id: p.id, 
+          name: p.name, 
+          quantity: p.quantity, 
+          status: p.status 
+        }))
+      );
+      
+      // Normalize quantity values to ensure they're numbers
+      const normalizedData = data.map(product => ({
+        ...product,
+        quantity: product.quantity !== null && product.quantity !== undefined ? Number(product.quantity) : 0
+      }));
+      
+      setProducts(normalizedData);
     } catch (err) {
       setError('Failed to load products');
       console.error('Error loading products:', err);
@@ -45,10 +73,16 @@ export default function ProductsScreen() {
 
   const addToCart = async (productId: number, productName: string) => {
     if (!isAuthenticated || !user) {
-      Alert.alert('Login Required', 'Please login to add items to cart', [
-        { text: 'Cancel', style: 'cancel' },
-        { text: 'Login', onPress: () => router.push('/login') },
-      ]);
+      setSnackbarMessage('🔒 Please sign in to add items to your cart');
+      setShowAuthSnackbar(true);
+
+      // Show the alert after a brief delay so user sees the snackbar first
+      setTimeout(() => {
+        Alert.alert('Login Required', 'Please sign in to add items to your cart', [
+          { text: 'Cancel', style: 'cancel' },
+          { text: 'Sign In', onPress: () => router.push('/login') },
+        ]);
+      }, 500);
       return;
     }
 
@@ -86,7 +120,14 @@ export default function ProductsScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+          <Surface
+            style={{
+              paddingHorizontal: 16,
+              paddingVertical: 8,
+              paddingTop: Math.max(8, insets.top),
+              elevation: 2,
+            }}
+          >
             <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
               Products
             </Text>
@@ -119,12 +160,18 @@ export default function ProductsScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-        <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
+        <Surface
+          style={{
+            paddingHorizontal: 16,
+            paddingVertical: 8,
+            paddingTop: Math.max(8, insets.top),
+            elevation: 2,
+          }}
+        >
           <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
             Products {products.length > 0 && `(${products.length})`}
           </Text>
-        </Surface>
-
+        </Surface>{' '}
         <ScrollView
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
@@ -255,6 +302,21 @@ export default function ProductsScreen() {
             </Card>
           )}
         </ScrollView>
+        {/* Authentication Snackbar */}
+        <Snackbar
+          visible={showAuthSnackbar}
+          onDismiss={() => setShowAuthSnackbar(false)}
+          duration={3000}
+          action={{
+            label: 'Sign In',
+            onPress: () => {
+              setShowAuthSnackbar(false);
+              router.push('/login');
+            },
+          }}
+        >
+          {snackbarMessage}
+        </Snackbar>
       </SafeAreaView>
     </SafeAreaProvider>
   );
