@@ -40,19 +40,15 @@ export default function ProductDetailsScreen() {
       try {
         setLoading(true);
         const productData = await productsService.getProductById(id);
-        console.log('🔍 [ProductDetails] Loaded product data:', JSON.stringify({
-          id: productData?.id,
-          name: productData?.name,
-          quantity: productData?.quantity,
-          status: productData?.status,
-          price: productData?.price,
-        }, null, 2));
-        
+
         // Ensure quantity is a number
         if (productData) {
-          productData.quantity = productData.quantity !== null && productData.quantity !== undefined ? Number(productData.quantity) : 0;
+          productData.quantity =
+            productData.quantity !== null && productData.quantity !== undefined
+              ? Number(productData.quantity)
+              : 0;
         }
-        
+
         setProduct(productData);
       } catch (error) {
         console.error('Error loading product:', error);

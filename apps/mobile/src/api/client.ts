@@ -17,7 +17,6 @@ class ApiClient {
   private async request<T>(endpoint: string, options: RequestInit = {}): Promise<ApiResponse<T>> {
     try {
       const url = `${this.baseURL}${endpoint}`;
-      console.log(`🌐 API Request: ${url}`);
 
       const response = await fetch(url, {
         headers: {
@@ -27,8 +26,6 @@ class ApiClient {
         },
         ...options,
       });
-
-      console.log(`📡 API Response: ${response.status} ${response.statusText}`);
 
       const data = await response.json();
 
@@ -40,7 +37,6 @@ class ApiClient {
         };
       }
 
-      console.log(`✅ API Success:`, data);
       return {
         data,
         status: response.status,

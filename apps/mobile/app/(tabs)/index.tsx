@@ -36,22 +36,15 @@ export default function ProductsScreen() {
     try {
       setError(null);
       const data = await productsService.getProducts();
-      console.log('🔍 [ProductsList] Loaded products:', data.length);
-      console.log('🔍 [ProductsList] Sample product quantities:', 
-        data.slice(0, 3).map(p => ({ 
-          id: p.id, 
-          name: p.name, 
-          quantity: p.quantity, 
-          status: p.status 
-        }))
-      );
-      
-      // Normalize quantity values to ensure they're numbers
-      const normalizedData = data.map(product => ({
+
+      const normalizedData = data.map((product) => ({
         ...product,
-        quantity: product.quantity !== null && product.quantity !== undefined ? Number(product.quantity) : 0
+        quantity:
+          product.quantity !== null && product.quantity !== undefined
+            ? Number(product.quantity)
+            : 0,
       }));
-      
+
       setProducts(normalizedData);
     } catch (err) {
       setError('Failed to load products');
@@ -265,7 +258,6 @@ export default function ProductsScreen() {
                   mode="outlined"
                   icon="eye"
                   onPress={() => {
-                    console.log('Navigating to product details, ID:', product.id);
                     router.push(`/product/${product.id}`);
                   }}
                   style={{ flex: 1, marginRight: 8 }}

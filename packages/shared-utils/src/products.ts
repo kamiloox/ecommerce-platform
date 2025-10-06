@@ -1,8 +1,11 @@
 import { Product, ProductsResult, ProductsQuery } from '@repo/cms-types';
 import { HttpClient, ApiResponse } from './types';
 
-// Use the ProductsQuery from cms-types instead of defining our own
-export type ProductsParams = ProductsQuery;
+// Extend ProductsQuery with sorting parameters
+export type ProductsParams = ProductsQuery & {
+  sortBy?: string;
+  sortOrder?: 'asc' | 'desc';
+};
 
 export class ProductsService {
   private httpClient: HttpClient;
@@ -23,6 +26,8 @@ export class ProductsService {
       searchParams.append('where[featured][equals]', params.featured.toString());
     if (params.category) searchParams.append('where[category][equals]', params.category);
     if (params.search) searchParams.append('where[name][contains]', params.search);
+    if (params.sortBy) searchParams.append('sortBy', params.sortBy);
+    if (params.sortOrder) searchParams.append('sortOrder', params.sortOrder);
 
     const queryString = searchParams.toString();
     const endpoint = `/products${queryString ? `?${queryString}` : ''}`;
@@ -55,7 +60,9 @@ export class ProductsService {
   }
 
   async getProductBySlug(slug: string): Promise<ApiResponse<Product>> {
-    const response = await this.httpClient.get<ProductsResult>(`/products?where[slug][equals]=${slug}`);
+    const response = await this.httpClient.get<ProductsResult>(
+      `/products?where[slug][equals]=${slug}`,
+    );
 
     if (response.error) {
       return {
@@ -86,15 +93,28 @@ export class ProductsService {
     });
   }
 
-  async searchProducts(query: string, limit: number = 20): Promise<ApiResponse<ProductsResult>> {
-    return this.getProducts({
-      search: query,
-      limit,
-      status: 'published',
-    });
+  async searchProducts(
+    query: string,
+    limit: number = 20,
+    page: number = 1,
+    sortBy?: string,
+    sortOrder?: 'asc' | 'desc',
+  ): Promise<ApiResponse<ProductsResult>> {
+    const searchParams = new URLSearchParams();
+    searchParams.append('q', query);
+    searchParams.append('limit', limit.toString());
+    searchParams.append('page', page.toString());
+    if (sortBy) searchParams.append('sortBy', sortBy);
+    if (sortOrder) searchParams.append('sortOrder', sortOrder);
+
+    const endpoint = `/products/search?${searchParams.toString()}`;
+    return this.httpClient.get<ProductsResult>(endpoint);
   }
 
-  async getProductsByCategory(category: string, limit: number = 20): Promise<ApiResponse<ProductsResult>> {
+  async getProductsByCategory(
+    category: string,
+    limit: number = 20,
+  ): Promise<ApiResponse<ProductsResult>> {
     return this.getProducts({
       category,
       limit,
@@ -106,7 +126,7 @@ export class ProductsService {
 // Utility functions for products
 export const getProductImageUrl = (product: Product, baseUrl?: string): string => {
   const base = baseUrl || '';
-  
+
   if (product.images && product.images.length > 0) {
     const firstImage = product.images[0];
     if (firstImage && typeof firstImage === 'object' && firstImage.image) {
@@ -115,7 +135,7 @@ export const getProductImageUrl = (product: Product, baseUrl?: string): string =
       }
     }
   }
-  
+
   // Fallback to a placeholder image
   return `${base}/api/media/placeholder-product.jpg`;
 };
@@ -132,7 +152,9 @@ export const calculateDiscountPercentage = (originalPrice: number, salePrice: nu
   return Math.round(((originalPrice - salePrice) / originalPrice) * 100);
 };
 
-export const getProductStatus = (product: Product): 'available' | 'out-of-stock' | 'coming-soon' => {
+export const getProductStatus = (
+  product: Product,
+): 'available' | 'out-of-stock' | 'coming-soon' => {
   if (product.status !== 'published') return 'coming-soon';
   if (product.quantity && product.quantity <= 0) return 'out-of-stock';
   return 'available';

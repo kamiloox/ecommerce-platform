@@ -4,11 +4,7 @@ import { Navbar, NavbarBrand, NavbarContent, NavbarItem, Link, Button } from '@h
 import { ShoppingBagIcon, ShoppingCartIcon, LockIcon, UserIcon } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 
-interface HeaderProps {
-  currentPath?: string;
-}
-
-export const Header = ({ currentPath }: HeaderProps) => {
+export const Header = () => {
   const { isAuthenticated } = useAuth();
 
   // Check for stored auth immediately to prevent navigation delays
@@ -24,18 +20,6 @@ export const Header = ({ currentPath }: HeaderProps) => {
           <p className="font-bold text-inherit">AJP Shop</p>
         </Link>
       </NavbarBrand>
-      <NavbarContent className="hidden sm:flex gap-4" justify="center">
-        <NavbarItem isActive={currentPath === '/'}>
-          <Link color="foreground" href="/">
-            Home
-          </Link>
-        </NavbarItem>
-        <NavbarItem isActive={currentPath === '/products'}>
-          <Link color="foreground" href="/products">
-            Products
-          </Link>
-        </NavbarItem>
-      </NavbarContent>
       <NavbarContent justify="end">
         {(isAuthenticated || hasStoredAuth) && (
           <NavbarItem>
