@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { ScrollView, RefreshControl, View, Alert } from 'react-native';
 import {
   Card,
@@ -9,60 +9,177 @@ import {
   ActivityIndicator,
   Avatar,
   Snackbar,
+  Searchbar,
+  Menu,
 } from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView, useSafeAreaInsets } from 'react-native-safe-area-context';
 import { router } from 'expo-router';
-import { Product } from '@repo/cms-types';
-import productsService from '../../src/api/products';
+import { Product, ProductsResult } from '@repo/cms-types';
+import { productsService } from '../../src/api/products';
 import cartService from '../../src/api/cart';
 import { getProductImageUrl } from '@repo/shared-utils/products';
 import { getApiBaseUrl } from '@repo/shared-utils/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useCartContext } from '../../src/contexts/CartContext';
+import { useDebounce } from '../../src/hooks/useDebounce';
+
+// Sort options
+const SORT_OPTIONS = [
+  { value: 'newest', label: 'Newest First', field: 'createdAt', order: 'desc' as const },
+  { value: 'price-asc', label: 'Price (Low to High)', field: 'price', order: 'asc' as const },
+  { value: 'price-desc', label: 'Price (High to Low)', field: 'price', order: 'desc' as const },
+  { value: 'name-asc', label: 'Name (A-Z)', field: 'name', order: 'asc' as const },
+  { value: 'featured', label: 'Featured First', field: 'featured', order: 'desc' as const },
+];
 
 export default function ProductsScreen() {
   const { user, isAuthenticated } = useAuth();
   const { refreshCartCount } = useCartContext();
   const insets = useSafeAreaInsets();
-  const [products, setProducts] = useState<Product[]>([]);
+
+  // State management
+  const [productsData, setProductsData] = useState<ProductsResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [loadingMore, setLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [addingToCart, setAddingToCart] = useState<number | null>(null);
   const [showAuthSnackbar, setShowAuthSnackbar] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState('');
 
-  const loadProducts = async () => {
-    try {
-      setError(null);
-      const data = await productsService.getProducts();
+  // Search and filter state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [isSearching, setIsSearching] = useState(false);
+  const [sortMenuVisible, setSortMenuVisible] = useState(false);
+  const [currentSort, setCurrentSort] = useState(SORT_OPTIONS[0]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [initialLoadComplete, setInitialLoadComplete] = useState(false);
 
-      const normalizedData = data.map((product) => ({
-        ...product,
-        quantity:
-          product.quantity !== null && product.quantity !== undefined
-            ? Number(product.quantity)
-            : 0,
-      }));
+  // Debounced search query (500ms delay)
+  const debouncedSearchQuery = useDebounce(searchQuery, 500);
 
-      setProducts(normalizedData);
-    } catch (err) {
-      setError('Failed to load products');
-      console.error('Error loading products:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+  const loadProducts = useCallback(
+    async (
+      page: number = 1,
+      append: boolean = false,
+      search?: string,
+      sortBy?: string,
+      sortOrder?: 'asc' | 'desc',
+    ): Promise<void> => {
+      try {
+        if (!append) {
+          setLoading(true);
+          setError(null);
+        } else {
+          setLoadingMore(true);
+        }
 
+        let data: ProductsResult;
+
+        if (search && search.trim().length >= 2) {
+          // Search products
+          data = await productsService.searchProducts({
+            query: search.trim(),
+            page,
+            sortBy,
+            sortOrder,
+          });
+        } else {
+          // Get all products
+          data = await productsService.getProducts({
+            page,
+            limit: 20,
+            status: 'published',
+            sortBy,
+            sortOrder,
+          });
+        }
+
+        if (append && productsData) {
+          // Append new products to existing list
+          setProductsData({
+            ...data,
+            docs: [...productsData.docs, ...data.docs],
+          });
+        } else {
+          // Replace products list
+          setProductsData(data);
+        }
+
+        setCurrentPage(page);
+      } catch (err) {
+        setError('Failed to load products');
+        console.error('Error loading products:', err);
+      } finally {
+        setLoading(false);
+        setLoadingMore(false);
+        setRefreshing(false);
+      }
+    },
+    [productsData],
+  );
+
+  // Initial load
   useEffect(() => {
-    loadProducts();
+    if (currentSort && !initialLoadComplete) {
+      loadProducts(1, false, '', currentSort.field, currentSort.order).then(() => {
+        setInitialLoadComplete(true);
+      });
+    }
   }, []);
 
-  const onRefresh = async () => {
+  // Respond to debounced search query changes
+  useEffect(() => {
+    // Only trigger search after initial load is complete to prevent interference
+    if (currentSort && initialLoadComplete) {
+      console.log('Debounced search triggered:', debouncedSearchQuery);
+      setIsSearching(debouncedSearchQuery.trim().length >= 2);
+      setCurrentPage(1);
+      loadProducts(1, false, debouncedSearchQuery, currentSort.field, currentSort.order);
+    }
+  }, [debouncedSearchQuery, currentSort, initialLoadComplete]);
+
+  // Handle search input change (just update local state, debouncing will trigger the API call)
+  const handleSearch = useCallback((query: string) => {
+    setSearchQuery(query);
+    // Don't trigger API call here - the useEffect with debouncedSearchQuery will handle it
+  }, []);
+
+  // Handle sort change
+  const handleSortChange = useCallback(
+    (sortOption: (typeof SORT_OPTIONS)[0]) => {
+      setCurrentSort(sortOption);
+      setSortMenuVisible(false);
+      setCurrentPage(1);
+      loadProducts(1, false, debouncedSearchQuery, sortOption.field, sortOption.order);
+    },
+    [debouncedSearchQuery],
+  );
+
+  // Handle load more (pagination)
+  const handleLoadMore = useCallback(() => {
+    if (productsData && productsData.hasNextPage && !loadingMore && currentSort) {
+      const nextPage = currentPage + 1;
+      loadProducts(nextPage, true, debouncedSearchQuery, currentSort.field, currentSort.order);
+    }
+  }, [productsData, loadingMore, currentPage, debouncedSearchQuery, currentSort]);
+
+  // Handle refresh
+  const onRefresh = useCallback(async () => {
     setRefreshing(true);
-    await loadProducts();
-    setRefreshing(false);
-  };
+    setCurrentPage(1);
+    if (currentSort) {
+      loadProducts(1, false, debouncedSearchQuery, currentSort.field, currentSort.order);
+    }
+  }, [debouncedSearchQuery, currentSort]);
+
+  // Clear search
+  const clearSearch = useCallback(() => {
+    setSearchQuery('');
+    setIsSearching(false);
+    setCurrentPage(1);
+    // The useEffect will handle the API call when debouncedSearchQuery becomes empty
+  }, []);
 
   const addToCart = async (productId: number, productName: string) => {
     if (!isAuthenticated || !user) {
@@ -141,7 +258,13 @@ export default function ProductsScreen() {
             >
               {error}
             </Text>
-            <Button mode="contained" onPress={loadProducts}>
+            <Button
+              mode="contained"
+              onPress={() =>
+                currentSort &&
+                loadProducts(1, false, debouncedSearchQuery, currentSort.field, currentSort.order)
+              }
+            >
               Try Again
             </Button>
           </View>
@@ -162,14 +285,68 @@ export default function ProductsScreen() {
           }}
         >
           <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-            Products {products.length > 0 && `(${products.length})`}
+            Products {productsData?.totalDocs ? `(${productsData.totalDocs})` : ''}
           </Text>
+
+          {/* Search bar */}
+          <Searchbar
+            placeholder="Search products..."
+            onChangeText={handleSearch}
+            value={searchQuery}
+            style={{ marginBottom: 12 }}
+            icon="magnify"
+            clearIcon="close"
+            onClearIconPress={clearSearch}
+          />
+
+          {/* Sort and results info */}
+          <View
+            style={{
+              flexDirection: 'row',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              marginBottom: 8,
+            }}
+          >
+            <View style={{ flex: 1 }}>
+              {productsData && (
+                <Text variant="bodySmall" style={{ color: '#666' }}>
+                  {isSearching ? 'Search results: ' : ''}
+                  {productsData.totalDocs} product{productsData.totalDocs !== 1 ? 's' : ''}
+                </Text>
+              )}
+            </View>
+
+            <Menu
+              visible={sortMenuVisible}
+              onDismiss={() => setSortMenuVisible(false)}
+              anchor={
+                <Button
+                  mode="outlined"
+                  compact
+                  icon="sort"
+                  onPress={() => setSortMenuVisible(true)}
+                >
+                  {currentSort?.label || 'Sort'}
+                </Button>
+              }
+            >
+              {SORT_OPTIONS.map((option) => (
+                <Menu.Item
+                  key={option.value}
+                  onPress={() => handleSortChange(option)}
+                  title={option.label}
+                  leadingIcon={currentSort?.value === option.value ? 'check' : undefined}
+                />
+              ))}
+            </Menu>
+          </View>
         </Surface>{' '}
         <ScrollView
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         >
-          {products.map((product) => (
+          {productsData?.docs?.map((product: Product) => (
             <Card
               key={product.id}
               style={{
@@ -280,7 +457,7 @@ export default function ProductsScreen() {
             </Card>
           ))}
 
-          {products.length === 0 && (
+          {(!productsData?.docs || productsData.docs.length === 0) && (
             <Card style={{ padding: 32, alignItems: 'center' }}>
               <Avatar.Icon
                 size={64}
@@ -289,9 +466,34 @@ export default function ProductsScreen() {
               />
               <Text variant="headlineSmall">No products found</Text>
               <Text variant="bodyMedium" style={{ textAlign: 'center', color: '#666' }}>
-                No products available at the moment
+                {isSearching && searchQuery.length >= 2
+                  ? `No products match "${searchQuery}". Try a different search term.`
+                  : 'No products are available at the moment.'}
               </Text>
+              {isSearching && searchQuery.length >= 2 && (
+                <Button mode="outlined" onPress={clearSearch} style={{ marginTop: 16 }}>
+                  View All Products
+                </Button>
+              )}
             </Card>
+          )}
+
+          {/* Load More Button for Pagination */}
+          {productsData && productsData.hasNextPage && (
+            <View style={{ alignItems: 'center', marginTop: 16 }}>
+              <Button
+                mode="outlined"
+                icon="reload"
+                onPress={handleLoadMore}
+                loading={loadingMore}
+                disabled={loadingMore}
+              >
+                {loadingMore ? 'Loading...' : 'Load More Products'}
+              </Button>
+              <Text variant="bodySmall" style={{ marginTop: 8, color: '#666' }}>
+                Page {productsData.page} of {productsData.totalPages}
+              </Text>
+            </View>
           )}
         </ScrollView>
         {/* Authentication Snackbar */}

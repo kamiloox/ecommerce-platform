@@ -21,6 +21,51 @@ import { getApiBaseUrl } from '@repo/shared-utils/api';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useCartContext } from '../../src/contexts/CartContext';
 
+// Types for rich text structure
+interface RichTextChild {
+  type: string;
+  text?: string;
+  children?: RichTextChild[];
+  version?: number;
+  [key: string]: unknown;
+}
+
+interface RichTextStructure {
+  root: {
+    type: string;
+    children: RichTextChild[];
+    direction: ('ltr' | 'rtl') | null;
+    format: 'left' | 'start' | 'center' | 'right' | 'end' | 'justify' | '';
+    indent: number;
+    version: number;
+  };
+  [key: string]: unknown;
+}
+
+// Helper function to extract plain text from rich text structure
+const extractTextFromRichText = (richText: RichTextStructure | null | undefined): string => {
+  if (!richText || !richText.root || !richText.root.children) {
+    return '';
+  }
+
+  const extractFromChildren = (children: RichTextChild[]): string => {
+    return children
+      .map((child) => {
+        if (child.type === 'text') {
+          return child.text || '';
+        }
+        if (child.children && Array.isArray(child.children)) {
+          return extractFromChildren(child.children);
+        }
+        return '';
+      })
+      .join(' ')
+      .trim();
+  };
+
+  return extractFromChildren(richText.root.children);
+};
+
 export default function ProductDetailsScreen() {
   const { id } = useLocalSearchParams<{ id: string }>();
   const { user, isAuthenticated } = useAuth();
@@ -357,7 +402,7 @@ export default function ProductDetailsScreen() {
                 <Divider style={{ marginVertical: 16 }} />
 
                 {/* Description */}
-                {product.shortDescription && (
+                {(product.shortDescription || product.description) && (
                   <>
                     <Text variant="titleMedium" style={{ marginBottom: 8 }}>
                       Description
@@ -370,7 +415,7 @@ export default function ProductDetailsScreen() {
                         marginBottom: 16,
                       }}
                     >
-                      {product.shortDescription}
+                      {product.shortDescription || extractTextFromRichText(product.description)}
                     </Text>
                   </>
                 )}
