@@ -17,7 +17,7 @@ interface ProductDetailsProps {
 }
 
 export const ProductDetails = ({ slug }: ProductDetailsProps) => {
-  const { data } = useQuery({
+  const { data, isPending } = useQuery({
     queryKey: ['product', slug],
     queryFn: () => getProduct({ slug }),
   });
@@ -81,6 +81,10 @@ export const ProductDetails = ({ slug }: ProductDetailsProps) => {
       });
     },
   });
+
+  if (isPending) {
+    return <div className="flex justify-center p-10">Loading...</div>;
+  }
 
   if (!data) {
     return <div>Product not found</div>;
