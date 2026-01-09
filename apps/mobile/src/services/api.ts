@@ -3,15 +3,16 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 import { AuthService } from '@repo/shared-utils/auth';
 import { CartService } from '@repo/shared-utils/cart';
 import { ProductsService } from '@repo/shared-utils/products';
-import { FetchHttpClient, getApiBaseUrl } from '@repo/shared-utils/api';
+import { FetchHttpClient } from '@repo/shared-utils/api';
 import { MobileStorageAdapter, setDefaultStorage } from '@repo/shared-utils/storage';
+import { API_BASE_URL } from '../api/config';
 
 // Set up storage adapter for mobile
 const mobileStorage = new MobileStorageAdapter(AsyncStorage);
 setDefaultStorage(mobileStorage);
 
 // Configure API base URL - uses environment detection
-const baseUrl = getApiBaseUrl();
+const baseUrl = API_BASE_URL;
 
 // Create auth headers provider function
 let authServiceInstance: AuthService | null = null;

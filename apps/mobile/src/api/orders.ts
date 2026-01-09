@@ -1,10 +1,8 @@
 import { Order } from '@repo/cms-types';
 import authService from './auth';
 
-// Get API URL from environment variables
-import { getApiBaseUrl } from '@repo/shared-utils/api';
-
-const API_BASE_URL = getApiBaseUrl();
+// Get API URL from config
+import { API_BASE_URL } from './config';
 
 export interface CreateOrderData {
   items: Array<{

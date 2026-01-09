@@ -1,9 +1,7 @@
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { User } from '@repo/cms-types';
-import { getApiBaseUrl } from '@repo/shared-utils/api';
+import { API_BASE_URL } from './config';
 import { AuthResponse, LoginCredentials, RegisterCredentials } from '@repo/shared-utils/types';
-
-const API_BASE_URL = getApiBaseUrl();
 
 const TOKEN_KEY = '@ecommerce_auth_token';
 const USER_KEY = '@ecommerce_user';

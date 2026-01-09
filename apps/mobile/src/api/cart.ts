@@ -1,8 +1,6 @@
 import { Product } from '@repo/cms-types';
 import authService from './auth';
-import { getApiBaseUrl } from '@repo/shared-utils/api';
-
-const API_BASE_URL = getApiBaseUrl();
+import { API_BASE_URL } from './config';
 
 export interface CartItem {
   product: number | Product;

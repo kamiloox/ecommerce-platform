@@ -16,8 +16,7 @@ import { router, useLocalSearchParams, Stack } from 'expo-router';
 import { Product } from '@repo/cms-types';
 import productsService from '../../src/api/products';
 import cartService from '../../src/api/cart';
-import { getProductImageUrl } from '@repo/shared-utils/products';
-import { getApiBaseUrl } from '@repo/shared-utils/api';
+import { getProductImageUrl } from '../../src/api/client';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useCartContext } from '../../src/contexts/CartContext';
 
@@ -257,7 +256,7 @@ export default function ProductDetailsScreen() {
               <Card style={{ margin: 16, elevation: 4 }}>
                 <Image
                   source={{
-                    uri: getProductImageUrl(product, getApiBaseUrl().replace('/api', '')),
+                    uri: getProductImageUrl(product),
                   }}
                   style={{
                     width: screenWidth - 32,

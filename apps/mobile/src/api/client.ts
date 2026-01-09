@@ -1,11 +1,10 @@
+import { Platform } from 'react-native';
 import { Product, ProductsResult } from '@repo/cms-types';
 import authService from './auth';
 
-// Get API URL from environment variables
-import { getApiBaseUrl } from '@repo/shared-utils/api';
+// Get API URL from config
+import { API_BASE_URL, API_ROOT_URL } from './config';
 import { ApiResponse } from '@repo/shared-utils/types';
-
-const API_BASE_URL = getApiBaseUrl();
 
 class ApiClient {
   private baseURL: string;
@@ -141,8 +140,14 @@ export const getProductImageUrl = (product: Product): string => {
       if (media.url) {
         // If URL is relative, make it absolute
         if (media.url.startsWith('/')) {
-          return `${API_BASE_URL}${media.url}`;
+          return `${API_ROOT_URL}${media.url}`;
         }
+        
+        // If URL is absolute and contains localhost, fix it for Android emulator
+        if (Platform.OS === 'android' && media.url.includes('localhost')) {
+          return media.url.replace('localhost', '10.0.2.2');
+        }
+
         return media.url;
       }
     }
