@@ -1,7 +1,6 @@
 import { Product, ProductsResult, ProductsQuery } from '@repo/cms-types';
 import { HttpClient, ApiResponse } from './types';
 
-// Extend ProductsQuery with sorting parameters
 export type ProductsParams = ProductsQuery & {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';

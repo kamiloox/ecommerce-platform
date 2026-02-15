@@ -10,18 +10,14 @@ export function useAuthNavigation() {
   const pathname = usePathname();
 
   useEffect(() => {
-    // Don't redirect during loading to prevent flash
     if (isLoading) return;
 
-    // If user is authenticated and trying to access auth pages, redirect to profile
     if (isAuthenticated && (pathname === '/login' || pathname === '/register')) {
       router.replace('/profile');
       return;
     }
 
-    // If user is not authenticated and trying to access protected pages
     if (!isAuthenticated && pathname === '/profile') {
-      // Don't redirect automatically - let the profile page handle showing auth UI
       return;
     }
   }, [isAuthenticated, isLoading, pathname, router]);
