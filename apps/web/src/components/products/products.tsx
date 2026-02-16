@@ -270,7 +270,7 @@ export const Products = ({
                   <CardBody className="p-0">
                     <Image
                       alt={product.name}
-                      className="w-full h-[300px] object-cover"
+                      className="w-full h-[300px] object-contain bg-white"
                       src={image ? getImageUrl(image) : ''}
                       removeWrapper
                     />

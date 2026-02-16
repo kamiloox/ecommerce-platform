@@ -200,12 +200,9 @@ export const getApiBaseUrl = (overrideUrl?: string): string => {
   }
 
   if (env.platform === 'web') {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL;
-    if (!baseUrl) {
-      throw new Error('NEXT_PUBLIC_API_URL environment variable is required for web platform');
-    }
-    const result = `${baseUrl}/api`; // Add /api prefix for Payload CMS
-    return result;
+    // Use relative path for web to leverage Next.js rewrites
+    // This avoids CORS issues and allows the Next.js server to proxy requests
+    return typeof window !== 'undefined' ? '/cms' : `${process.env.NEXT_PUBLIC_API_URL}/api`;
   }
 
   // Server environment (Next.js SSR) - treat same as web
