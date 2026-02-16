@@ -101,12 +101,6 @@ export class AuthService {
       };
     }
   }
-      return {
-        success: false,
-        message: error instanceof Error ? error.message : 'Registration failed',
-      };
-    }
-  }
 
   async logout(): Promise<void> {
     try {
