@@ -26,6 +26,10 @@ export const createOrder = async (orderData: CreateOrderData): Promise<Order> =>
     // Get current user data to include as customer
     const currentUser = await getCurrentUser();
 
+    if (!currentUser || !currentUser.user) {
+      throw new Error('User not found');
+    }
+
     const orderWithCustomer = {
       ...orderData,
       customer: currentUser.user.id,
@@ -65,6 +69,10 @@ export const getCurrentUserOrders = async (): Promise<Order[]> => {
   try {
     // Get current user data to fetch their orders
     const currentUser = await getCurrentUser();
+
+    if (!currentUser || !currentUser.user) {
+      return [];
+    }
 
     const result = await wretch(
       `${baseUrl}/cms/orders?where[customer][equals]=${currentUser.user.id}`,

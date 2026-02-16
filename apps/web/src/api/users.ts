@@ -5,10 +5,15 @@ import authService from './auth';
 
 export const getCurrentUser = async () => {
   const baseUrl = getBaseUrl();
-  const result = await wretch(`${baseUrl}/cms/users/me`)
-    .headers(authService.getAuthHeaders())
-    .get()
-    .json<CurrentUser>();
+  try {
+    const result = await wretch(`${baseUrl}/cms/users/me`)
+      .headers(authService.getAuthHeaders())
+      .get()
+      .json<CurrentUser>();
 
-  return result;
+    return result;
+  } catch (error) {
+    console.warn('Failed to fetch current user:', error);
+    return null;
+  }
 };
