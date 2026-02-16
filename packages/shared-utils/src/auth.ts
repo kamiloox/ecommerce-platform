@@ -80,34 +80,27 @@ export class AuthService {
   async register(credentials: RegisterCredentials): Promise<AuthResponse> {
     try {
       const response = await this.httpClient.post<{
-        user: User;
-        token: string;
-        exp: number;
-      }>('/users/register', credentials);
+        doc: User;
+        message: string;
+      }>('/users', credentials);
 
-      if (response.error || !response.data) {
+      if (response.error) {
         return {
           success: false,
           message: response.error || 'Registration failed',
         };
       }
 
-      const { user, token, exp } = response.data;
-      
-      // Store the token and user
-      await this.storage.setItem(TOKEN_KEY, token);
-      await this.storage.setItem(USER_KEY, JSON.stringify(user));
-      
-      this.token = token;
-      this.user = user;
-
-      return {
-        success: true,
-        user,
-        token,
-        exp,
-      };
+      // Auto-login after successful registration
+      return this.login(credentials);
     } catch (error) {
+      console.error('Registration error:', error);
+      return {
+        success: false,
+        message: error instanceof Error ? error.message : 'Registration failed',
+      };
+    }
+  }
       return {
         success: false,
         message: error instanceof Error ? error.message : 'Registration failed',
