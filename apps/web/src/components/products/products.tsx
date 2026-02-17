@@ -263,22 +263,44 @@ export const Products = ({
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {data.docs.map((product) => {
             const image = product.images?.[0];
+            const compareAtPrice =
+              typeof product.compareAtPrice === 'number' ? product.compareAtPrice : null;
+            const hasDiscount = compareAtPrice !== null && compareAtPrice > product.price;
+            const discountPercentage = hasDiscount
+              ? Math.round(((compareAtPrice - product.price) / compareAtPrice) * 100)
+              : 0;
 
             return (
               <Link key={product.id} href={`/offer/${product.slug}`}>
-                <Card className="w-full cursor-pointer hover:shadow-lg transition-shadow">
+                <Card className="w-full h-full cursor-pointer hover:shadow-lg transition-shadow flex flex-col p-2">
                   <CardBody className="p-0">
-                    <Image
-                      alt={product.name}
-                      className="w-full h-[300px] object-contain bg-white"
-                      src={image ? getImageUrl(image) : ''}
-                      removeWrapper
-                    />
+                    <div className="relative">
+                      {hasDiscount && (
+                        <span className="absolute left-2 top-2 z-20 rounded-md bg-danger text-white text-[11px] leading-none font-semibold px-2 py-1 shadow-sm pointer-events-none">
+                          -{discountPercentage}%
+                        </span>
+                      )}
+                      <Image
+                        alt={product.name}
+                        className="w-full h-[300px] object-contain bg-white"
+                        src={image ? getImageUrl(image) : ''}
+                        removeWrapper
+                      />
+                    </div>
                   </CardBody>
-                  <CardFooter className="flex flex-col items-start">
-                    <div className="flex justify-between items-center w-full mb-2">
-                      <h3 className="text-lg font-semibold">{product.name}</h3>
-                      <p className="text-default-500 font-medium">${product.price.toFixed(2)}</p>
+                  <CardFooter className="flex flex-col items-start mt-auto pt-3">
+                    <div className="flex justify-between items-start w-full mb-1">
+                      <h3 className="text-lg font-semibold line-clamp-2 min-h-[32px]">{product.name}</h3>
+                      <div className="text-right flex flex-col items-end leading-tight">
+                        <p className="text-default-500 font-medium">${product.price.toFixed(2)}</p>
+                        {hasDiscount ? (
+                          <p className="text-xs text-danger line-through">
+                            ${compareAtPrice.toFixed(2)}
+                          </p>
+                        ) : (
+                          <p className="text-xs invisible">$0.00</p>
+                        )}
+                      </div>
                     </div>
                     <Button
                       color="primary"
@@ -286,7 +308,7 @@ export const Products = ({
                       radius="full"
                       size="md"
                       startContent={<ShoppingCartIcon size={16} />}
-                      className="w-full"
+                      className="w-full mt-0"
                       onClick={(event) => handleAddToCart(product.id, product.name, event)}
                     >
                       Add to Cart
