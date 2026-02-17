@@ -7,11 +7,22 @@ import { useAuth } from '@/contexts/AuthContext';
 export const Header = () => {
   const { isAuthenticated } = useAuth();
 
+  const hasValidStoredUser =
+    typeof window !== 'undefined' &&
+    (() => {
+      try {
+        const raw = localStorage.getItem('auth_user');
+        if (!raw) return false;
+        const parsed = JSON.parse(raw);
+        return !!(parsed && typeof parsed === 'object' && typeof parsed.email === 'string');
+      } catch {
+        return false;
+      }
+    })();
+
   // Check for stored auth immediately to prevent navigation delays
   const hasStoredAuth =
-    typeof window !== 'undefined' &&
-    localStorage.getItem('auth_token') &&
-    localStorage.getItem('auth_user');
+    typeof window !== 'undefined' && !!localStorage.getItem('auth_token') && hasValidStoredUser;
   return (
     <Navbar isBordered>
       <NavbarBrand>

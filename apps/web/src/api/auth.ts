@@ -38,7 +38,26 @@ class AuthService {
 
     this.token = localStorage.getItem('auth_token');
     const userString = localStorage.getItem('auth_user');
-    this.user = userString ? JSON.parse(userString) : null;
+
+    if (!userString) {
+      this.user = null;
+      this.initialized = true;
+      return;
+    }
+
+    try {
+      const parsedUser = JSON.parse(userString);
+      this.user =
+        parsedUser && typeof parsedUser === 'object' && typeof parsedUser.email === 'string'
+          ? (parsedUser as User)
+          : null;
+    } catch {
+      this.user = null;
+      this.token = null;
+      localStorage.removeItem('auth_token');
+      localStorage.removeItem('auth_user');
+    }
+
     this.initialized = true;
   }
 

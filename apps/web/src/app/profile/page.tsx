@@ -145,11 +145,26 @@ const ProfilePage = () => {
   const { navigateToAuth } = useAuthNavigation();
   const router = useRouter();
 
+  const getStoredUser = (): User | null => {
+    if (typeof window === 'undefined') return null;
+
+    const storedUserString = localStorage.getItem('auth_user');
+    if (!storedUserString) return null;
+
+    try {
+      const parsed = JSON.parse(storedUserString);
+      if (parsed && typeof parsed === 'object' && typeof parsed.email === 'string') {
+        return parsed as User;
+      }
+      return null;
+    } catch {
+      return null;
+    }
+  };
+
   // Immediate client-side auth check to prevent flash
   const hasStoredAuth =
-    typeof window !== 'undefined' &&
-    localStorage.getItem('auth_token') &&
-    localStorage.getItem('auth_user');
+    typeof window !== 'undefined' && !!localStorage.getItem('auth_token') && !!getStoredUser();
 
   const handleLogout = async () => {
     const confirmed = window.confirm('Are you sure you want to logout?');
@@ -179,22 +194,16 @@ const ProfilePage = () => {
 
   // If we have stored auth data but context isn't ready yet, show authenticated view
   if (hasStoredAuth && !isAuthenticated && isLoading) {
-    // Parse stored user for immediate display
-    const storedUserString = localStorage.getItem('auth_user');
-    if (storedUserString) {
-      try {
-        const storedUser = JSON.parse(storedUserString);
-        return (
-          <AuthenticatedProfileView
-            user={storedUser}
-            onLogout={handleLogout}
-            onComingSoon={handleComingSoon}
-            router={router}
-          />
-        );
-      } catch (error) {
-        console.error('Error parsing stored user:', error);
-      }
+    const storedUser = getStoredUser();
+    if (storedUser) {
+      return (
+        <AuthenticatedProfileView
+          user={storedUser}
+          onLogout={handleLogout}
+          onComingSoon={handleComingSoon}
+          router={router}
+        />
+      );
     }
   }
 
