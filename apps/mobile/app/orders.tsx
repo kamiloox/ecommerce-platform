@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { ScrollView, View, RefreshControl } from 'react-native';
-import { Card, Text, Button, Surface, ActivityIndicator, Avatar, Chip } from 'react-native-paper';
+import { Card, Text, Button, ActivityIndicator, Avatar, Chip } from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
 import { Order } from '@repo/cms-types';
 import orderService from '../src/api/orders';
 import { useAuth } from '../src/contexts/AuthContext';
@@ -81,11 +81,12 @@ export default function OrdersScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
-            <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-              Orders
-            </Text>
-          </Surface>
+          <Stack.Screen
+            options={{
+              title: 'Orders',
+              headerBackButtonDisplayMode: 'minimal',
+            }}
+          />
 
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
             <Avatar.Icon
@@ -115,11 +116,12 @@ export default function OrdersScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
-            <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-              Orders
-            </Text>
-          </Surface>
+          <Stack.Screen
+            options={{
+              title: 'Orders',
+              headerBackButtonDisplayMode: 'minimal',
+            }}
+          />
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator size="large" />
             <Text variant="bodyMedium" style={{ marginTop: 16 }}>
@@ -135,11 +137,12 @@ export default function OrdersScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
-            <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-              Orders
-            </Text>
-          </Surface>
+          <Stack.Screen
+            options={{
+              title: 'Orders',
+              headerBackButtonDisplayMode: 'minimal',
+            }}
+          />
 
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
             <Avatar.Icon
@@ -168,11 +171,12 @@ export default function OrdersScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-        <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
-          <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-            Orders {orders.length > 0 && `(${orders.length})`}
-          </Text>
-        </Surface>
+        <Stack.Screen
+          options={{
+            title: `Orders${orders.length > 0 ? ` (${orders.length})` : ''}`,
+            headerBackButtonDisplayMode: 'minimal',
+          }}
+        />
 
         <ScrollView
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
@@ -207,7 +211,7 @@ export default function OrdersScreen() {
                 }}
                 mode="elevated"
               >
-                <Card.Content style={{ paddingTop: 16 }}>
+                <Card.Content style={{ paddingTop: 16, paddingBottom: 16 }}>
                   <View
                     style={{
                       flexDirection: 'row',
@@ -285,31 +289,20 @@ export default function OrdersScreen() {
                   )}
                 </Card.Content>
 
-                <Card.Actions style={{ justifyContent: 'space-between', paddingHorizontal: 16 }}>
-                  <Button
-                    mode="outlined"
-                    icon="eye"
-                    onPress={() => {
-                      // Navigate to order details if needed
-                      console.log('View order details:', order.id);
-                    }}
-                    style={{ flex: 1, marginRight: 8 }}
-                  >
-                    View Details
-                  </Button>
-                  {order.status === 'delivered' && (
+                {order.status === 'delivered' && (
+                  <Card.Actions style={{ paddingHorizontal: 16 }}>
                     <Button
                       mode="contained"
                       icon="cart-plus"
                       onPress={() => {
                         router.navigate('/(tabs)');
                       }}
-                      style={{ flex: 1, marginLeft: 8 }}
+                      style={{ flex: 1 }}
                     >
                       Reorder
                     </Button>
-                  )}
-                </Card.Actions>
+                  </Card.Actions>
+                )}
               </Card>
             ))
           )}

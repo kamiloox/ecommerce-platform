@@ -1,17 +1,17 @@
 import React, { useState, useEffect } from 'react';
-import { ScrollView, View, Alert } from 'react-native';
+import { ScrollView, View, Alert, KeyboardAvoidingView, Platform } from 'react-native';
 import {
   Card,
   Text,
   Button,
   TextInput,
-  Surface,
   ActivityIndicator,
   Avatar,
   Divider,
 } from 'react-native-paper';
 import { SafeAreaProvider, SafeAreaView } from 'react-native-safe-area-context';
-import { router } from 'expo-router';
+import { router, Stack } from 'expo-router';
+import { useHeaderHeight } from '@react-navigation/elements';
 import { Cart } from '@repo/cms-types';
 import { cartService } from '../src/services/api';
 import orderService, { ShippingAddress } from '../src/api/orders';
@@ -19,6 +19,7 @@ import { useAuth } from '../src/contexts/AuthContext';
 import { useCartContext } from '../src/contexts/CartContext';
 
 export default function CheckoutScreen() {
+  const headerHeight = useHeaderHeight();
   const { user, isAuthenticated } = useAuth();
   const { refreshCartCount } = useCartContext();
   const [cart, setCart] = useState<Cart | null>(null);
@@ -137,6 +138,12 @@ export default function CheckoutScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
+          <Stack.Screen
+            options={{
+              title: 'Checkout',
+              headerBackButtonDisplayMode: 'minimal',
+            }}
+          />
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 32 }}>
             <Avatar.Icon
               size={64}
@@ -165,11 +172,12 @@ export default function CheckoutScreen() {
     return (
       <SafeAreaProvider>
         <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-          <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
-            <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-              Checkout
-            </Text>
-          </Surface>
+          <Stack.Screen
+            options={{
+              title: 'Checkout',
+              headerBackButtonDisplayMode: 'minimal',
+            }}
+          />
           <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
             <ActivityIndicator size="large" />
             <Text variant="bodyMedium" style={{ marginTop: 16 }}>
@@ -184,13 +192,23 @@ export default function CheckoutScreen() {
   return (
     <SafeAreaProvider>
       <SafeAreaView style={{ flex: 1, backgroundColor: '#f5f5f5' }}>
-        <Surface style={{ paddingHorizontal: 16, paddingVertical: 8, elevation: 2 }}>
-          <Text variant="headlineSmall" style={{ marginBottom: 8, textAlign: 'center' }}>
-            Checkout
-          </Text>
-        </Surface>
+        <Stack.Screen
+          options={{
+            title: 'Checkout',
+            headerBackButtonDisplayMode: 'minimal',
+          }}
+        />
 
-        <ScrollView contentContainerStyle={{ padding: 16, paddingBottom: 100 }}>
+        <KeyboardAvoidingView
+          style={{ flex: 1 }}
+          behavior={Platform.OS === 'ios' ? 'position' : 'height'}
+          keyboardVerticalOffset={Platform.OS === 'ios' ? headerHeight : 0}
+        >
+        <ScrollView
+          keyboardShouldPersistTaps="handled"
+          keyboardDismissMode={Platform.OS === 'ios' ? 'interactive' : 'on-drag'}
+          contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
+        >
           {/* Order Summary */}
           <Card style={{ marginBottom: 16, elevation: 4, borderRadius: 12 }} mode="elevated">
             <Card.Content>
@@ -343,6 +361,7 @@ export default function CheckoutScreen() {
             </Card.Actions>
           </Card>
         </ScrollView>
+        </KeyboardAvoidingView>
       </SafeAreaView>
     </SafeAreaProvider>
   );

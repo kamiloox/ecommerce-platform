@@ -21,6 +21,7 @@ import { getProductImageUrl } from '../../src/api/client';
 import { useAuth } from '../../src/contexts/AuthContext';
 import { useCartContext } from '../../src/contexts/CartContext';
 import { useDebounce } from '../../src/hooks/useDebounce';
+import { calculateDiscountPercentage, formatPrice } from '@repo/shared-utils/products';
 
 // Sort options
 const SORT_OPTIONS = [
@@ -345,7 +346,17 @@ export default function ProductsScreen() {
           refreshControl={<RefreshControl refreshing={refreshing} onRefresh={onRefresh} />}
           contentContainerStyle={{ padding: 16, paddingBottom: 100 }}
         >
-          {productsData?.docs?.map((product: Product) => (
+          {productsData?.docs?.map((product: Product) => {
+            const compareAtPrice =
+              typeof product.compareAtPrice === 'number' ? product.compareAtPrice : null;
+            const isOnSale = !!compareAtPrice && compareAtPrice > product.price;
+            const discountPercentage =
+              isOnSale && compareAtPrice
+                ? calculateDiscountPercentage(compareAtPrice, product.price)
+                : 0;
+            const savings = isOnSale && compareAtPrice ? compareAtPrice - product.price : 0;
+
+            return (
             <Card
               key={product.id}
               style={{
@@ -394,18 +405,18 @@ export default function ProductsScreen() {
                 </View>
 
                 <View style={{ flexDirection: 'row', alignItems: 'center', marginBottom: 12 }}>
-                  {product.compareAtPrice && product.compareAtPrice > product.price && (
+                  {isOnSale && (
                     <Chip
                       icon="percent"
                       mode="flat"
                       style={{ backgroundColor: '#ff5722', marginRight: 8 }}
                       textStyle={{ color: 'white', fontSize: 10 }}
                     >
-                      SALE
+                      {discountPercentage}% OFF
                     </Chip>
                   )}
                   <View style={{ marginLeft: 'auto', alignItems: 'flex-end' }}>
-                    {product.compareAtPrice && product.compareAtPrice > product.price && (
+                    {isOnSale && compareAtPrice && (
                       <Text
                         variant="bodySmall"
                         style={{
@@ -413,7 +424,7 @@ export default function ProductsScreen() {
                           color: '#999',
                         }}
                       >
-                        ${product.compareAtPrice.toFixed(2)}
+                        {formatPrice(compareAtPrice)}
                       </Text>
                     )}
                     <Text
@@ -423,8 +434,13 @@ export default function ProductsScreen() {
                         fontWeight: 'bold',
                       }}
                     >
-                      ${product.price.toFixed(2)}
+                      {formatPrice(product.price)}
                     </Text>
+                    {isOnSale && savings > 0 && (
+                      <Text variant="bodySmall" style={{ color: '#2e7d32', fontWeight: '600' }}>
+                        Save {formatPrice(savings)}
+                      </Text>
+                    )}
                   </View>
                 </View>
               </Card.Content>
@@ -454,7 +470,8 @@ export default function ProductsScreen() {
                 </Button>
               </Card.Actions>
             </Card>
-          ))}
+            );
+          })}
 
           {(!productsData?.docs || productsData.docs.length === 0) && (
             <Card style={{ padding: 32, alignItems: 'center' }}>

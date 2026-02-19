@@ -1,5 +1,5 @@
 import { Order } from '@repo/cms-types';
-import authService from './auth';
+import { authService } from '../services/api';
 
 // Get API URL from config
 import { API_BASE_URL } from './config';
@@ -35,9 +35,9 @@ class OrderService {
         customer: customerId,
       };
 
-      const response = await fetch(`${API_BASE_URL}/api/orders`, {
+      const response = await fetch(`${API_BASE_URL}/orders`, {
         method: 'POST',
-        headers: authService.getAuthHeaders(),
+        headers: await authService.getAuthHeaders(),
         body: JSON.stringify(orderWithCustomer),
       });
 
@@ -55,8 +55,8 @@ class OrderService {
 
   async getUserOrders(userId: number): Promise<Order[]> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/orders?where[customer][equals]=${userId}`, {
-        headers: authService.getAuthHeaders(),
+      const response = await fetch(`${API_BASE_URL}/orders?where[customer][equals]=${userId}`, {
+        headers: await authService.getAuthHeaders(),
       });
 
       if (!response.ok) {
@@ -73,8 +73,8 @@ class OrderService {
 
   async getOrderById(orderId: number): Promise<Order | null> {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/orders/${orderId}`, {
-        headers: authService.getAuthHeaders(),
+      const response = await fetch(`${API_BASE_URL}/orders/${orderId}`, {
+        headers: await authService.getAuthHeaders(),
       });
 
       if (!response.ok) {
